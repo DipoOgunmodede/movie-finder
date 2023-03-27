@@ -1,0 +1,128 @@
+<script setup>
+
+import HelloWorld from './components/HelloWorld.vue'
+import axios from 'axios'
+
+import { ref, onMounted } from 'vue'
+
+const movieList = ref([])
+// const currentPage = ref(1)
+const actor1 = ref('')
+const actor2 = ref('')
+const actors = ref([])
+const actorsCommonFilms = ref({})
+const actor1Filmography = ref([])
+
+const getPopularMovieList = () => {
+  axios.get('https://api.themoviedb.org/3/movie/popular?api_key=c92bac37a196e6559bcb667ecb49b1e1&language=en-US&page=1')
+    .then(function (response) {
+      // Check out the console to see the results
+      movieList.value = response.data.results
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
+}
+
+//can I turn this into a venn diagram?
+//why const and anonymous function?
+
+const queryParams = {
+  params: {
+    api_key: "c92bac37a196e6559bcb667ecb49b1e1",
+  },
+}
+
+const genericDatabaseQuery = (typeOfQuery, queryTerm, query) => {
+  const urlRequest = axios.get(
+    `https://api.themoviedb.org/3/${typeOfQuery}/${queryTerm}/query="${query}"}`, queryParams
+  )
+}
+
+const getActorIdFromName = (actorName) => {
+  //search tmdb for actor name and return their id
+  return axios.get(
+    `https://api.themoviedb.org/3/search/person?query="${actorName}"`, queryParams
+  )
+}
+
+const getMovieCreditsByActorId = (actorId) => {
+  // return the promise
+  return axios.get(
+    `https://api.themoviedb.org/3/person/${actorId}/movie_credits`, queryParams
+  )
+}
+
+const getActorFilmography = async (actorName) => {
+  //get the actor id from the name
+  let actorId = await getActorIdFromName(actorName)
+  //get the movie credits from the actor id
+  const movieCredits = await getMovieCreditsByActorId(actorId.data.results[0].id)
+  //return the movie credits
+  console.log(movieCredits.data.cast)
+  return movieCredits.data.cast
+}
+
+const compareBothActorsFilmographies = async (firstActor, secondActor) => {
+
+  //get the filmographies of both actors and turn them into arrays
+  const actor1Filmography = await getActorFilmography(firstActor)
+  const actor2Filmography = await getActorFilmography(secondActor)
+
+  const actor1FilmographyIds = actor1Filmography.map(movie => movie.id)
+  const actor2FilmographyIds = actor2Filmography.map(movie => movie.id)
+  //check films have the same id, then filter the array to only include the common film objects
+  const commonFilms = actor1Filmography.filter(movie => actor2FilmographyIds.includes(movie.id))
+  console.log(commonFilms)
+  actorsCommonFilms.value = commonFilms
+}
+</script>
+
+<template>
+  <div class="h-screen flex flex-col justify-center bg-black text-white px-4">
+    <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
+
+   
+    <details>
+      <summary>Current limitations:</summary>
+      Only 2 actors can be compared at a time
+      The app only searches for the first result returned by the API. If there are multiple actors with the same name,
+      the app will only search for the first result.
+      The message about the actors not being in a film together is the default condition because the <code>v-else</code>
+      is hit immediately on pageload (actorsCommonFilms is falsy onload)
+    </details>
+    <details>
+      <summary>Future improvements:</summary>
+      Hyperlink the film titles to the film page on TMBD/imdb
+      Show rating for each film
+      Interpolate the actors names into the message about them not being in a film together
+      Increase max limit of actors to compare
+    </details>
+
+    <!-- This is an app that will search TMBD when you enter two or more actors and show you if they have been in a movie together. -->
+    <!-- <input type="text" class="actor1" v-model="actor1" placeholder="Search for an actor" />                                                          -->
+    <div class="flex justify-center gap-4">
+      <label class="text-white flex flex-col">
+        Actor 1
+        <input type="text" class="actor actor1 text-black" v-model="actor1"  placeholder="Search for an actor" />
+      </label>
+      <label class="text-white flex flex-col">
+        Actor 2
+        <input type="text" class="actor actor2 text-black" v-model="actor2"  placeholder="Search for an actor" />
+      </label>
+    </div>
+    <!-- <button @click="getActorFilmography(actor1)">Get actor 1 filmography</button>
+                        <button @click="getActorFilmography(actor2)">Get actor 2 filmography</button> -->
+    <button @click="compareBothActorsFilmographies(actor1, actor2)" class="p-4 my-4 border border-white">Compare filmographies</button>
+    <!-- show list if they have appeared in a film together -->
+    <ul v-if="actorsCommonFilms.length">
+      <h2>These actors have been in the following films:</h2>
+      <li v-for="film in actorsCommonFilms" :key="film.id">
+        <a>{{ film.original_title }}</a>
+      </li>
+    </ul>
+    <p v-else>These actors have not been in a film together</p>
+
+  </div>
+</template>

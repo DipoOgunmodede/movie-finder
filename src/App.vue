@@ -83,38 +83,47 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
   <div class="h-screen flex flex-col justify-center bg-black text-white px-4">
     <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
 
-   
+
     <details>
       <summary>Current limitations:</summary>
-      Only 2 actors can be compared at a time
-      The app only searches for the first result returned by the API. If there are multiple actors with the same name,
-      the app will only search for the first result.
-      The message about the actors not being in a film together is the default condition because the <code>v-else</code>
-      is hit immediately on pageload (actorsCommonFilms is falsy onload)
-    </details>
-    <details>
-      <summary>Future improvements:</summary>
-      Hyperlink the film titles to the film page on TMBD/imdb
-      Show rating for each film
-      Interpolate the actors names into the message about them not being in a film together
-      Increase max limit of actors to compare
+      <ul>
+        <li>Only 2 actors can be compared at a time</li>
+        <li>
+          The app only searches for the first result returned by the API. If there are multiple actors with the exact same
+          name,
+          the app will only search for the first result.
+        </li>
+
+        <li>The message about the actors not being in a film together is the default condition because the <code
+            class="font-mono">v-else</code>
+          is hit immediately on pageload (<code class="font-mono">actorsCommonFilms</code> is falsy onload). If I can be
+          bothered I will bind this to a check on "submit"</li>
+      </ul>
     </details>
 
-    <!-- This is an app that will search TMBD when you enter two or more actors and show you if they have been in a movie together. -->
-    <!-- <input type="text" class="actor1" v-model="actor1" placeholder="Search for an actor" />                                                          -->
-    <div class="flex justify-center gap-4">
-      <label class="text-white flex flex-col">
+    <details>
+      <summary>Future improvements:</summary>
+      <ul>
+        <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
+        <li>Show rating for each film</li>
+        <li>Interpolate the actors names into the message about them not being in a film together</li>
+        <li>Increase max limit of actors to compare</li>
+      </ul>
+    </details>
+
+    <div class="flex flex-col justify-center gap-4">
+      <label class="text-white flex flex-col gap-2">
         Actor 1
-        <input type="text" class="actor actor1 text-black" v-model="actor1"  placeholder="Search for an actor" />
+        <input type="text" class="actor actor1 text-black p-2" v-model="actor1" placeholder="Search for an actor" />
       </label>
-      <label class="text-white flex flex-col">
+      <label class="text-white flex flex-col gap-2">
         Actor 2
-        <input type="text" class="actor actor2 text-black" v-model="actor2"  placeholder="Search for an actor" />
+        <input type="text" class="actor actor2 text-black p-2" v-model="actor2" placeholder="Search for an actor" />
       </label>
     </div>
-    <!-- <button @click="getActorFilmography(actor1)">Get actor 1 filmography</button>
-                        <button @click="getActorFilmography(actor2)">Get actor 2 filmography</button> -->
-    <button @click="compareBothActorsFilmographies(actor1, actor2)" class="p-4 my-4 border border-white">Compare filmographies</button>
+
+    <button @click="compareBothActorsFilmographies(actor1, actor2)" class="p-4 my-4 border border-white">Compare
+      filmographies</button>
     <!-- show list if they have appeared in a film together -->
     <ul v-if="actorsCommonFilms.length">
       <h2>These actors have been in the following films:</h2>

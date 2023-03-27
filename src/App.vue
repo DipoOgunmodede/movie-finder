@@ -88,6 +88,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
       <summary>Current limitations:</summary>
       <ul>
         <li>Only 2 actors can be compared at a time</li>
+        <li>While case insensitive, there is no way to handle typos</li>
         <li>
           The app only searches for the first result returned by the API. If there are multiple actors with the exact same
           name,

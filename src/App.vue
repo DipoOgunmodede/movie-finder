@@ -113,7 +113,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
     <div class="border border-white p-4 my-4">
       <details>
         <summary>Current limitations (I won't be fixing these):</summary>
-        <ul>
+        <ul class="list-disc list-inside">
           <li>This looks like absolute shit</li>
           <li>Only 2 actors can be compared at a time</li>
           <li>While case insensitive, there is no way to handle typos</li>
@@ -130,7 +130,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
 
       <details>
         <summary>Future improvements:</summary>
-        <ul>
+        <ul class="list-disc list-inside">
           <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
           <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
           <li>Order list by rating</li>

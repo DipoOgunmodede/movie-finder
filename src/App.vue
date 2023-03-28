@@ -80,7 +80,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center text-white px-4">
+  <div class="flex flex-col justify-center text-white p-4">
     <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
 
 
@@ -105,7 +105,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
         following {{ actorsCommonFilms.length }} films:</h2>
       <li v-for="film in actorsCommonFilms" :key="film.id">
         <a>{{ film.original_title }}</a>
-        <img src="" alt="">
+        <img :src="`https://image.tmdb.org/t/p/w500${film.poster_path}`" :alt="`Movie title:${film.original_title}`">
       </li>
     </ul>
     <p v-else>These actors have not been in a film together</p>

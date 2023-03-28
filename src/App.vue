@@ -85,7 +85,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
 
 
     <details>
-      <summary>Current limitations:</summary>
+      <summary>Current limitations (I won't be fixing these):</summary>
       <ul>
         <li>This looks like absolute shit</li>
         <li>Only 2 actors can be compared at a time</li>
@@ -95,11 +95,6 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
           name,
           the app will only search for the first result.
         </li>
-
-        <li>The message about the actors not being in a film together is the default condition because the <code
-            class="font-mono">v-else</code>
-          is hit immediately on pageload (<code class="font-mono">actorsCommonFilms</code> is truthy onload). If I can be
-          bothered I will bind this to a check on enter keyup, input focus change and button click</li>
       </ul>
     </details>
 
@@ -107,8 +102,15 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
       <summary>Future improvements:</summary>
       <ul>
         <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
+        <li>Order list by rating</li>
+        <li>Show data as a venn diagram</li>
+        <li>Allow user to search for more than 2 actors</li>
         <li>Show user feedback while API query happens</li>
         <li>Show rating for each film</li>
+        <li>The message about the actors not being in a film together is the default condition because the <code
+            class="font-mono">v-else</code>
+          is hit immediately on pageload (<code class="font-mono">actorsCommonFilms</code> is truthy onload). If I can be
+          bothered I will bind this to a check on enter keyup, input focus change and button click</li>
         <li>Interpolate the actors names into the message about them not being in a film together</li>
         <li>Increase max limit of actors to compare</li>
       </ul>

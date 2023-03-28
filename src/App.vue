@@ -7,8 +7,8 @@ import { ref, onMounted } from 'vue'
 
 const movieList = ref([])
 // const currentPage = ref(1)
-const actor1 = ref('')
-const actor2 = ref('')
+const actor1 = ref('Matt Damon')
+const actor2 = ref('Ben Affleck')
 const actors = ref([])
 const actorsCommonFilms = ref({})
 const actor1Filmography = ref([])
@@ -80,7 +80,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col justify-center bg-black text-white px-4">
+  <div class="flex flex-col justify-center text-white px-4">
     <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
 
 
@@ -95,22 +95,26 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
           name,
           the app will only search for the first result.
         </li>
+        <li>You can search the same person twice</li>
+
       </ul>
     </details>
 
     <details>
       <summary>Future improvements:</summary>
       <ul>
+        <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
         <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
         <li>Order list by rating</li>
+        <li>Hard coded "films", there is no handling of a single film being returned</li>
         <li>Show data as a venn diagram</li>
         <li>Allow user to search for more than 2 actors</li>
         <li>Show user feedback while API query happens</li>
         <li>Show rating for each film</li>
         <li>The message about the actors not being in a film together is the default condition because the <code
-            class="font-mono">v-else</code>
-          is hit immediately on pageload (<code class="font-mono">actorsCommonFilms</code> is truthy onload). If I can be
-          bothered I will bind this to a check on enter keyup, input focus change and button click</li>
+            class="text-code">v-else</code>
+          is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code> is truthy onload). If I can be
+          bothered I will bind this to a check on enter keyup, input focus change and button click. Basically more event listening</li>
         <li>Interpolate the actors names into the message about them not being in a film together</li>
         <li>Increase max limit of actors to compare</li>
       </ul>
@@ -131,12 +135,12 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
       filmographies</button>
     <!-- show list if they have appeared in a film together -->
     <ul v-if="actorsCommonFilms.length">
-      <h2>These actors have been in the following films:</h2>
+      <h2  class="text-2xl underline">These actors <span class="text-xs">(or actresses 😑)</span> have been in the following {{actorsCommonFilms.length}} films:</h2>
       <li v-for="film in actorsCommonFilms" :key="film.id">
         <a>{{ film.original_title }}</a>
+        <img src="" alt="">
       </li>
     </ul>
     <p v-else>These actors have not been in a film together</p>
-
   </div>
 </template>

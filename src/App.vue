@@ -100,9 +100,9 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
     <button @click="compareBothActorsFilmographies(actor1, actor2)" class="p-4 my-4 border border-white">Compare
       filmographies</button>
     <!-- show list if they have appeared in a film together -->
+    <h2 class="text-2xl underline">These actors <span class="text-xs">(or actresses 😑)</span> have been in the
+      following {{ actorsCommonFilms.length }} films:</h2>
     <ul v-if="actorsCommonFilms.length">
-      <h2 class="text-2xl underline">These actors <span class="text-xs">(or actresses 😑)</span> have been in the
-        following {{ actorsCommonFilms.length }} films:</h2>
       <li v-for="film in actorsCommonFilms" :key="film.id">
         <a>{{ film.original_title }}</a>
         <img :src="`https://image.tmdb.org/t/p/w500${film.poster_path}`" :alt="`Movie title:${film.original_title}`">
@@ -131,6 +131,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
       <details>
         <summary>Future improvements:</summary>
         <ul class="list-disc list-inside">
+          <li>Responsive styles</li>
           <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
           <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
           <li>Order list by rating</li>

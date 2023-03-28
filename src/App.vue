@@ -87,6 +87,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
     <details>
       <summary>Current limitations:</summary>
       <ul>
+        <li>This looks like absolute shit</li>
         <li>Only 2 actors can be compared at a time</li>
         <li>While case insensitive, there is no way to handle typos</li>
         <li>
@@ -97,8 +98,8 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
 
         <li>The message about the actors not being in a film together is the default condition because the <code
             class="font-mono">v-else</code>
-          is hit immediately on pageload (<code class="font-mono">actorsCommonFilms</code> is falsy onload). If I can be
-          bothered I will bind this to a check on "submit"</li>
+          is hit immediately on pageload (<code class="font-mono">actorsCommonFilms</code> is truthy onload). If I can be
+          bothered I will bind this to a check on enter keyup, input focus change and button click</li>
       </ul>
     </details>
 
@@ -106,6 +107,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
       <summary>Future improvements:</summary>
       <ul>
         <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
+        <li>Show user feedback while API query happens</li>
         <li>Show rating for each film</li>
         <li>Interpolate the actors names into the message about them not being in a film together</li>
         <li>Increase max limit of actors to compare</li>

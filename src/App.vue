@@ -84,41 +84,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
     <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
 
 
-    <details>
-      <summary>Current limitations (I won't be fixing these):</summary>
-      <ul>
-        <li>This looks like absolute shit</li>
-        <li>Only 2 actors can be compared at a time</li>
-        <li>While case insensitive, there is no way to handle typos</li>
-        <li>
-          The app only searches for the first result returned by the API. If there are multiple actors with the exact same
-          name,
-          the app will only search for the first result.
-        </li>
-        <li>You can search the same person twice</li>
 
-      </ul>
-    </details>
-
-    <details>
-      <summary>Future improvements:</summary>
-      <ul>
-        <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
-        <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
-        <li>Order list by rating</li>
-        <li>Hard coded "films", there is no handling of a single film being returned</li>
-        <li>Show data as a venn diagram</li>
-        <li>Allow user to search for more than 2 actors</li>
-        <li>Show user feedback while API query happens</li>
-        <li>Show rating for each film</li>
-        <li>The message about the actors not being in a film together is the default condition because the <code
-            class="text-code">v-else</code>
-          is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code> is truthy onload). If I can be
-          bothered I will bind this to a check on enter keyup, input focus change and button click. Basically more event listening</li>
-        <li>Interpolate the actors names into the message about them not being in a film together</li>
-        <li>Increase max limit of actors to compare</li>
-      </ul>
-    </details>
 
     <div class="flex flex-col justify-center gap-4">
       <label class="text-white flex flex-col gap-2">
@@ -135,12 +101,55 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
       filmographies</button>
     <!-- show list if they have appeared in a film together -->
     <ul v-if="actorsCommonFilms.length">
-      <h2  class="text-2xl underline">These actors <span class="text-xs">(or actresses 😑)</span> have been in the following {{actorsCommonFilms.length}} films:</h2>
+      <h2 class="text-2xl underline">These actors <span class="text-xs">(or actresses 😑)</span> have been in the
+        following {{ actorsCommonFilms.length }} films:</h2>
       <li v-for="film in actorsCommonFilms" :key="film.id">
         <a>{{ film.original_title }}</a>
         <img src="" alt="">
       </li>
     </ul>
     <p v-else>These actors have not been in a film together</p>
+
+    <div class="border border-white p-4 my-4">
+      <details>
+        <summary>Current limitations (I won't be fixing these):</summary>
+        <ul>
+          <li>This looks like absolute shit</li>
+          <li>Only 2 actors can be compared at a time</li>
+          <li>While case insensitive, there is no way to handle typos</li>
+          <li>
+            The app only searches for the first result returned by the API. If there are multiple actors with the exact
+            same
+            name,
+            the app will only search for the first result.
+          </li>
+          <li>You can search the same person twice</li>
+
+        </ul>
+      </details>
+
+      <details>
+        <summary>Future improvements:</summary>
+        <ul>
+          <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
+          <li>Hyperlink the film titles to the film page on TMBD/imdb</li>
+          <li>Order list by rating</li>
+          <li>Hard coded "films", there is no handling of a single film being returned</li>
+          <li>Show data as a venn diagram</li>
+          <li>Allow user to search for more than 2 actors</li>
+          <li>Show user feedback while API query happens</li>
+          <li>Show rating for each film</li>
+          <li>The message about the actors not being in a film together is the default condition because the <code
+              class="text-code">v-else</code>
+            is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code> is truthy onload). If I can
+            be
+            bothered I will bind this to a check on enter keyup, input focus change and button click. Basically more event
+            listening</li>
+          <li>Interpolate the actors names into the message about them not being in a film together</li>
+          <li>Increase max limit of actors to compare</li>
+        </ul>
+      </details>
+    </div>
   </div>
 </template>
+

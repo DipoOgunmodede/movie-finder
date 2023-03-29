@@ -125,8 +125,7 @@ onMounted(() => {
         <summary>Current limitations (I won't be fixing these):</summary>
         <ul class="list-disc list-inside">
           <li>This looks like absolute shit</li>
-          <li>The API accepts any string meaning actors can be searched with just one name, e.g. Johnson returns Dwayne
-            Johnson's ID</li>
+          <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom Cruise's ID</li>
           <li>Only 2 actors can be compared at a time</li>
           <li>While case insensitive, there is no way to handle typos</li>
           <li>

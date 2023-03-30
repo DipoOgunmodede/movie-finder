@@ -140,6 +140,7 @@ onMounted(() => {
       <details>
         <summary>Future improvements:</summary>
         <ul class="list-disc list-inside">
+          <li>Overhaul design completely</li>
           <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
           <li>Carousel display </li>
           <li>Properly obfuscate API key</li>

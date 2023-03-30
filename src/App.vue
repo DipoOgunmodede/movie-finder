@@ -124,7 +124,6 @@ onMounted(() => {
       <details>
         <summary>Current limitations (I won't be fixing these):</summary>
         <ul class="list-disc list-inside">
-          <li>This looks like absolute shit</li>
           <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom Cruise's ID</li>
           <li>Only 2 actors can be compared at a time</li>
           <li>While case insensitive, there is no way to handle typos</li>
@@ -142,24 +141,24 @@ onMounted(() => {
       <details>
         <summary>Future improvements:</summary>
         <ul class="list-disc list-inside">
-          <li class="line-through">Responsive styles (implemented 29/3/23)</li>
-          <li>Carousel display on mobile (maybe, if I can be bothered)</li>
+          <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
+          <li>Carousel display </li>
+          <li>Properly obfuscate API key</li>
+          <li>Image toggle, probably with <code class="text-code">v-if</code></li>
           <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
           <li class="line-through">Hyperlink the film titles to the film page on TMBD/imdb</li>
-          <li>Order list by rating (implemented 29/3/23)</li>
+          <li>Order list by rating</li>
           <li>Hard coded "films", there is no handling of a single film being returned</li>
-          <li>Show data as a venn diagram</li>
+          <li>Show data as a venn diagram(?)</li>
           <li>Allow user to search for more than 2 actors</li>
-          <li>Show user feedback while API query happens</li>
+          <li>Show user feedback while API query happens ("Searching...")</li>
           <li>Show rating for each film</li>
           <li>The message about the actors not being in a film together is the default condition because the <code
               class="text-code">v-else</code>
-            is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code> is truthy onload). If I can
-            be
-            bothered I will bind this to a check on enter keyup, input focus change and button click. Basically more event
-            listening</li>
-          <li>Interpolate the actors names into the message about them not being in a film together</li>
-          <li>Increase max limit of actors to compare</li>
+            is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is truthy onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more event
+            listening.</li>
+          <li>Interpolate the actors names into the message about them not being in a film together, but only after the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and <code>$actor2</code> haven't appeared in a film together on load</li>
+          <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)</li>
         </ul>
       </details>
     </div>

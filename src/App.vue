@@ -125,7 +125,6 @@ onMounted(() => {
         <summary>Current limitations (I won't be fixing these):</summary>
         <ul class="list-disc list-inside">
           <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom Cruise's ID</li>
-          <li>Only 2 actors can be compared at a time</li>
           <li>While case insensitive, there is no way to handle typos</li>
           <li>
             The app only searches for the first result returned by the API. If there are multiple actors with the exact

@@ -1,5 +1,4 @@
 <script setup>
-
 import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios'
 
@@ -10,6 +9,7 @@ const movieList = ref([])
 const actor1 = ref('Matt Damon')
 const actor2 = ref('Ben Affleck')
 const actorsCommonFilms = ref({})
+const showImages = ref(false)
 
 const getPopularMovieList = () => {
   axios.get('https://api.themoviedb.org/3/movie/popular?api_key=c92bac37a196e6559bcb667ecb49b1e1&language=en-US&page=1')
@@ -23,7 +23,6 @@ const getPopularMovieList = () => {
     })
 }
 
-//can I turn this into a venn diagram?
 //why const and anonymous function?
 
 const queryParams = {
@@ -32,11 +31,11 @@ const queryParams = {
   },
 }
 
-const genericDatabaseQuery = (typeOfQuery, queryTerm, query) => {
-  const urlRequest = axios.get(
-    `https://api.themoviedb.org/3/${typeOfQuery}/${queryTerm}/query="${query}"}`, queryParams
-  )
-}
+// const genericDatabaseQuery = (typeOfQuery, queryTerm, query) => {
+//   const urlRequest = axios.get(
+//     `https://api.themoviedb.org/3/${typeOfQuery}/${queryTerm}/query="${query}"}`, queryParams
+//   )
+// }
 
 const getActorIdFromName = (actorName) => {
   //search tmdb for actor name and return their id
@@ -85,7 +84,14 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
   actorsCommonFilms.value = [...commonFilms]
   console.log(actorsCommonFilms.value)
 }
-
+const computeGridStyles = () => {
+  //if images are shown, add responsive grid classes
+  if (showImages.value) {
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-end gap-4"
+  } else {
+    return ""
+  }
+}
 onMounted(() => {
   console.log("What are you looking for here?")
 })
@@ -103,6 +109,9 @@ onMounted(() => {
         Actor 2
         <input type="text" class="actor actor2 text-black p-2" v-model="actor2" placeholder="Search for an actor" />
       </label>
+      <label>Toggle images? {{ showImages }}
+        <input type="checkbox" v-model="showImages" />
+      </label>
     </div>
 
     <button @click="compareBothActorsFilmographies(actor1, actor2)" class="p-4 my-4 border border-white">Compare
@@ -110,11 +119,12 @@ onMounted(() => {
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline">These actors <span class="text-xs">(or actresses)</span> have been in the
       following {{ actorsCommonFilms.length }} films:</h2>
-    <ul v-if="actorsCommonFilms.length"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 p-4">
+    <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id">
-        <a :href="`https://www.imdb.com/title/${film.imdb}`"><title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title >
-          <img :src="`https://image.tmdb.org/t/p/w500${film.poster_path}`" :alt="`Movie title: ${film.original_title}`">
+        <a :href="`https://www.imdb.com/title/${film.imdb}`">
+          <title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title>
+          <img v-if="showImages" :src="`https://image.tmdb.org/t/p/w500${film.poster_path}`"
+            :alt="`Movie title: ${film.original_title}`">
         </a>
       </li>
     </ul>
@@ -124,14 +134,11 @@ onMounted(() => {
       <details>
         <summary>Current limitations (I won't be fixing these):</summary>
         <ul class="list-disc list-inside">
-          <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom Cruise's ID</li>
+          <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom
+            Cruise's ID</li>
           <li>While case insensitive, there is no way to handle typos</li>
-          <li>
-            The app only searches for the first result returned by the API. If there are multiple actors with the exact
-            same
-            name,
-            the app will only search for the first result.
-          </li>
+          <li>The app only searches for the first result returned by the API. If there are multiple actors with the exact
+            same name, the app will only search for the first result.</li>
           <li>You can search the same person twice</li>
 
         </ul>
@@ -144,7 +151,7 @@ onMounted(() => {
           <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
           <li>Carousel display </li>
           <li>Properly obfuscate API key</li>
-          <li>Image toggle, probably with <code class="text-code">v-if</code></li>
+          <li><span class="line-through">Image toggle, probably with <code class="text-code">v-if</code></span> implemented 31/3/23</li>
           <li>Dark mode toggle using <code class="text-code">@media (prefers-color-scheme)</code></li>
           <li class="line-through">Hyperlink the film titles to the film page on TMBD/imdb</li>
           <li>Order list by rating</li>
@@ -155,13 +162,15 @@ onMounted(() => {
           <li>Show rating for each film</li>
           <li>The message about the actors not being in a film together is the default condition because the <code
               class="text-code">v-else</code>
-            is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is truthy onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more event
+            is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is truthy
+            onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more event
             listening.</li>
-          <li>Interpolate the actors names into the message about them not being in a film together, but only after the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and <code>$actor2</code> haven't appeared in a film together on load</li>
+          <li>Interpolate the actors names into the message about them not being in a film together, but only after the
+            previous change. Trying to do this now will incorrectly say <code>$actor1</code> and <code>$actor2</code>
+            haven't appeared in a film together on load</li>
           <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)</li>
         </ul>
       </details>
-    </div>
   </div>
-</template>
+</div></template>
 

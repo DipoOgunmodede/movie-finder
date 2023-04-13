@@ -5,8 +5,8 @@ import { ref, onMounted } from 'vue'
 
 const movieList = ref([])
 // const currentPage = ref(1)
-const actor1 = ref('Matt Damon')
-const actor2 = ref('Ben Affleck')
+const actor1 = ref('50 Cent')
+const actor2 = ref('Miranda Hart')
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
 const showImages = ref(false)

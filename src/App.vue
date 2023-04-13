@@ -7,6 +7,7 @@ const actorsCommonFilms = ref({})
 const actorPictures = ref([])
 const showImages = ref(true)
 const isLoading = ref(false)
+const loadingOffset = ref(0)
 const queryParams = {
   params: {
     api_key: "c92bac37a196e6559bcb667ecb49b1e1",
@@ -79,7 +80,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
     const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams)
     movie.imdb = externalIds.data.imdb_id
   })
-  
+
   //check and remove films with duplicate ids (some actors are in films twice)
   commonFilms = commonFilms.filter((film, index, self) =>
     index === self.findIndex((t) => (
@@ -92,7 +93,9 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
   })
   actorsCommonFilms.value = [...commonFilms]
   //set is loading to false
-  isLoading.value = false
+  loadingOffset.value > 0 ? setTimeout(() => {
+    isLoading.value = false
+  }, loadingOffset.value) : isLoading.value = false
   console.log(actorsCommonFilms.value, isLoading)
 }
 const computeGridStyles = () => {
@@ -115,7 +118,7 @@ onMounted(() => {
     <div class="flex flex-col justify-center gap-4">
       <transition name="fade">
         <div v-if="isLoading"
-          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col md:flex-row gap-6 justify-center items-center">
+          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col md:flex-row gap-6 justify-center items-center z-10">
           <p class="text-2xl animate-pulse">{{ actor1 }} & {{ actor2 }}</p>
           <img v-for="actor in actorPictures" :src="actor" class="h-64 w-64 rounded-full object-cover animate-spin" />
         </div>
@@ -130,9 +133,15 @@ onMounted(() => {
         <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2" v-model="actor2"
           placeholder="Search for an actor" @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
       </label>
-      <label class="text-2xl flex">Toggle images? {{ showImages }}
-        <input type="checkbox" v-model="showImages" class="ml-4 scale-150"/>
-      </label>
+      <details>
+        <summary>Options</summary>
+        <label class="text-2xl flex">Toggle images? {{ showImages }}
+          <input type="checkbox" v-model="showImages" class="ml-4 scale-150" />
+        </label>
+        <label class="text-2xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
+          <input type="range" v-model="loadingOffset" min="0" max="2500" step="100" class="w-full md:w-1/2" />
+        </label>
+      </details>
     </div>
 
     <button @click="compareBothActorsFilmographies(actor1, actor2)"
@@ -189,13 +198,13 @@ onMounted(() => {
               <li><span class="line-through">Show user feedback while API query happens ("Searching...")</span>implemented
                 13/4/23</li>
               <li><span class="line-through">Fixed bug where double credited actors would show two listings</span></li>
-              <li><span class="line-through">The message about the actors not being in a film together is the default condition because the <code
-                  class="text-code">v-else</code>
-                is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is
-                truthy
-                onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more
-                event
-                listening.</span>implemented 13/4/23</li>
+              <li><span class="line-through">The message about the actors not being in a film together is the default
+                  condition because the <code class="text-code">v-else</code>
+                  is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is
+                  truthy
+                  onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more
+                  event
+                  listening.</span>implemented 13/4/23</li>
               <li><span class="line-through">Add error handling for typos/no results</span>implemented 13/4/23</li>
               <li><span class="line-through">Interpolate the actors names into the message about them not being in a film
                   together, but only after
@@ -204,6 +213,7 @@ onMounted(() => {
                   haven't appeared in a film together on load</span> implemented 13/4/23</li>
               <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
               </li>
+              <li><span class="line-through">show loading screen for longer before showing results</span> implemented 13/4/23</li>
             </ul>
           </details>
         </div>

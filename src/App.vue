@@ -8,6 +8,7 @@ const movieList = ref([])
 const actor1 = ref('Matt Damon')
 const actor2 = ref('Ben Affleck')
 const actorsCommonFilms = ref({})
+const actorPictures = ref([])
 const showImages = ref(false)
 const isLoading = ref(false)
 
@@ -44,16 +45,17 @@ const generateImageLink = (imagePath) => {
 }
 
 const getActorFilmography = async (actorName) => {
+  
   //get the actor id from the name
   let actorId = await getActorIdFromName(actorName)
   //get photos
   const actorImagePath = actorId.data.results[0].profile_path
   const actorImage = generateImageLink(actorImagePath)
-  console.log(actorImage)
+  //push this into an array of images, after initially setting it to an empty array
+  actorPictures.value = [...actorPictures.value, actorImage]
   //get the movie credits from the actor id
   const movieCredits = await getMovieCreditsByActorId(actorId.data.results[0].id)
   
-
   //add external ids to each film object
   movieCredits.data.cast.forEach(async (movie) => {
     const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams)
@@ -66,11 +68,11 @@ const getActorFilmography = async (actorName) => {
 const compareBothActorsFilmographies = async (firstActor, secondActor) => {
   //set is loading to true
   isLoading.value = true
+  //clear actorpictures array before adding new images
+  actorPictures.value = []
   //get the filmographies of both actors and turn them into arrays
   const actor1Filmography = await getActorFilmography(firstActor)
   const actor2Filmography = await getActorFilmography(secondActor)
-  //get actor photos for both actors
-
   const actor1FilmographyIds = actor1Filmography.map(movie => movie.id)
   const actor2FilmographyIds = actor2Filmography.map(movie => movie.id)
   //check films have the same id, then filter the array to only include the common film objects
@@ -103,19 +105,20 @@ const computeGridStyles = () => {
     return ""
   }
 }
-// onMounted(() => {
-//   compareBothActorsFilmographies(actor1.value, actor2.value)
-// })
+onMounted(() => {
+  compareBothActorsFilmographies(actor1.value, actor2.value)
+})
 </script>
 
 <template>
   <div class="flex flex-col justify-center dark:text-white p-4">
     <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
-    <div class="flex flex-col justify-center gap-4 relative">
+    <div class="flex flex-col justify-center gap-4">
       <transition name="fade">
         <div v-if="isLoading"
-          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-50 flex justify-center items-center">
-          <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col md:flex-row gap-6 justify-center items-center">
+          <p class="text-2xl animate-pulse">{{ actor1 }} & {{ actor2 }}</p>
+          <img v-for="actor in actorPictures" :src="actor" class="h-64 w-64 rounded-full object-cover animate-spin" />
         </div>
       </transition>
       <label class="dark:text-white flex flex-col gap-2">
@@ -126,7 +129,7 @@ const computeGridStyles = () => {
       <label class="dark:text-white flex flex-col gap-2">
         Actor 2
         <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2" v-model="actor2"
-          placeholder="Search for an actor" />
+          placeholder="Search for an actor"  @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
       </label>
       <label>Toggle images? {{ showImages }}
         <input type="checkbox" v-model="showImages" />
@@ -183,7 +186,7 @@ const computeGridStyles = () => {
                   returned</span> implemented 4/4/23</li>
               <li>Show data as a venn diagram(?)</li>
               <li>Allow user to search for more than 2 actors</li>
-              <li>Show user feedback while API query happens ("Searching...")</li>
+              <li><span class="line-through">Show user feedback while API query happens ("Searching...")</span>implemented 13/4/23</li>
               <li><span class="line-through">Fixed bug where double credited actors would show two listings</span></li>
               <li>The message about the actors not being in a film together is the default condition because the <code
                   class="text-code">v-else</code>

@@ -26,15 +26,24 @@ const queryParams = {
 //   )
 // }
 
-const getActorIdFromName = (actorName) => {
+const getActorIdFromName = async (actorName) => {
   //search tmdb for actor name and return their id
 
-  return axios.get(
+  const idPromise = await axios.get(
     `https://api.themoviedb.org/3/search/person?query="${actorName}"`, queryParams
   )
+  if (idPromise.data.results.length === 0) {
+    console.log("no results")
+    //set is loading to false
+    isLoading.value = false
+    //alert user that no results were found for actorname
+    alert(`No results found for ${actorName}. Please check the spelling and try again.`)
+  }
+  // return the promise
+  return idPromise
 }
 const getMovieCreditsByActorId = async (actorId) => {
- 
+
   // return the promise
   return axios.get(
     `https://api.themoviedb.org/3/person/${actorId}/movie_credits`, queryParams
@@ -45,7 +54,7 @@ const generateImageLink = (imagePath) => {
 }
 
 const getActorFilmography = async (actorName) => {
-  
+
   //get the actor id from the name
   let actorId = await getActorIdFromName(actorName)
   //get photos
@@ -55,7 +64,7 @@ const getActorFilmography = async (actorName) => {
   actorPictures.value = [...actorPictures.value, actorImage]
   //get the movie credits from the actor id
   const movieCredits = await getMovieCreditsByActorId(actorId.data.results[0].id)
-  
+
   //add external ids to each film object
   movieCredits.data.cast.forEach(async (movie) => {
     const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams)
@@ -95,7 +104,7 @@ const compareBothActorsFilmographies = async (firstActor, secondActor) => {
   actorsCommonFilms.value = [...commonFilms]
   //set is loading to false
   isLoading.value = false
-   console.log(actorsCommonFilms.value, isLoading)
+  console.log(actorsCommonFilms.value, isLoading)
 }
 const computeGridStyles = () => {
   //if images are shown, add responsive grid classes
@@ -130,10 +139,10 @@ onMounted(() => {
       <label class="dark:text-white flex flex-col gap-2">
         Actor 2
         <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2" v-model="actor2"
-          placeholder="Search for an actor"  @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
+          placeholder="Search for an actor" @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
       </label>
-      <label>Toggle images? {{ showImages }}
-        <input type="checkbox" v-model="showImages" />
+      <label class="text-2xl flex">Toggle images? {{ showImages }}
+        <input type="checkbox" v-model="showImages" class="ml-4 scale-150"/>
       </label>
     </div>
 
@@ -141,20 +150,22 @@ onMounted(() => {
       class="p-4 my-4 border border-black dark:border-white">Compare
       filmographies</button>
     <!-- show list if they have appeared in a film together -->
-    <h2 class="text-4xl underline">These actors <span class="text-xs">(or actresses)</span> have been in the
+    <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">These actors <span class="text-xs">(or
+        actresses)</span> have been in the
       following {{ actorsCommonFilms.length }}
       {{ actorsCommonFilms.length < 2 ? "film" : "films" }} :</h2>
         <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
           <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
             <a :href="`https://www.imdb.com/title/${film.imdb}`">
               <title class="inline-block mb-
-                             text-2xl">{{ film.original_title }}</title>
-              <img v-if="showImages" :src=generateImageLink(film.poster_path)
-                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95">
+                                             text-2xl">{{ film.original_title }}</title>
+              <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
+                class="md:group-hover:scale-95">
             </a>
           </li>
         </ul>
-        <p v-else>These actors have not been in a film together</p>
+        <h2 class="text-4xl underline" v-if="actorsCommonFilms == ''"> These actors have not been in a film
+          together</h2>
         <div class="border border-black dark:border-white p-4 my-4">
           <details>
             <summary>Current limitations (I won't be fixing these):</summary>
@@ -187,20 +198,22 @@ onMounted(() => {
                   returned</span> implemented 4/4/23</li>
               <li>Show data as a venn diagram(?)</li>
               <li>Allow user to search for more than 2 actors</li>
-              <li><span class="line-through">Show user feedback while API query happens ("Searching...")</span>implemented 13/4/23</li>
+              <li><span class="line-through">Show user feedback while API query happens ("Searching...")</span>implemented
+                13/4/23</li>
               <li><span class="line-through">Fixed bug where double credited actors would show two listings</span></li>
-              <li>The message about the actors not being in a film together is the default condition because the <code
+              <li><span class="line-through">The message about the actors not being in a film together is the default condition because the <code
                   class="text-code">v-else</code>
                 is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is
                 truthy
                 onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more
                 event
-                listening.</li>
-              <li>Interpolate the actors names into the message about them not being in a film together, but only after
-                the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
-                <code>$actor2</code>
-                haven't appeared in a film together on load
-              </li>
+                listening.</span>implemented 13/4/23</li>
+              <li><span class="line-through">Add error handling for typos/no results</span>implemented 13/4/23</li>
+              <li><span class="line-through">Interpolate the actors names into the message about them not being in a film
+                  together, but only after
+                  the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
+                  <code>$actor2</code>
+                  haven't appeared in a film together on load</span> implemented 13/4/23</li>
               <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
               </li>
             </ul>

@@ -1,34 +1,19 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-
-const movieList = ref([])
-// const currentPage = ref(1)
 const actor1 = ref('50 Cent')
 const actor2 = ref('Miranda Hart')
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
-const showImages = ref(false)
+const showImages = ref(true)
 const isLoading = ref(false)
-
-//why const and anonymous function?
-
 const queryParams = {
   params: {
     api_key: "c92bac37a196e6559bcb667ecb49b1e1",
   },
 }
-
-// const genericDatabaseQuery = (typeOfQuery, queryTerm, query) => {
-//   const urlRequest = axios.get(
-//     `https://api.themoviedb.org/3/${typeOfQuery}/${queryTerm}/query="${query}"}`, queryParams
-//   )
-// }
-
 const getActorIdFromName = async (actorName) => {
   //search tmdb for actor name and return their id
-
   const idPromise = await axios.get(
     `https://api.themoviedb.org/3/search/person?query="${actorName}"`, queryParams
   )
@@ -43,7 +28,6 @@ const getActorIdFromName = async (actorName) => {
   return idPromise
 }
 const getMovieCreditsByActorId = async (actorId) => {
-
   // return the promise
   return axios.get(
     `https://api.themoviedb.org/3/person/${actorId}/movie_credits`, queryParams
@@ -54,14 +38,15 @@ const generateImageLink = (imagePath) => {
 }
 
 const getActorFilmography = async (actorName) => {
-
   //get the actor id from the name
   let actorId = await getActorIdFromName(actorName)
   //get photos
   const actorImagePath = actorId.data.results[0].profile_path
   const actorImage = generateImageLink(actorImagePath)
+
   //push this into an array of images, after initially setting it to an empty array
   actorPictures.value = [...actorPictures.value, actorImage]
+
   //get the movie credits from the actor id
   const movieCredits = await getMovieCreditsByActorId(actorId.data.results[0].id)
 
@@ -77,20 +62,24 @@ const getActorFilmography = async (actorName) => {
 const compareBothActorsFilmographies = async (firstActor, secondActor) => {
   //set is loading to true
   isLoading.value = true
+
   //clear actorpictures array before adding new images
   actorPictures.value = []
+
   //get the filmographies of both actors and turn them into arrays
   const actor1Filmography = await getActorFilmography(firstActor)
   const actor2Filmography = await getActorFilmography(secondActor)
-  const actor1FilmographyIds = actor1Filmography.map(movie => movie.id)
   const actor2FilmographyIds = actor2Filmography.map(movie => movie.id)
+
   //check films have the same id, then filter the array to only include the common film objects
   let commonFilms = actor1Filmography.filter(movie => actor2FilmographyIds.includes(movie.id))
+
   //add external ids to each film object
   commonFilms.forEach(async (movie) => {
     const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams)
     movie.imdb = externalIds.data.imdb_id
   })
+  
   //check and remove films with duplicate ids (some actors are in films twice)
   commonFilms = commonFilms.filter((film, index, self) =>
     index === self.findIndex((t) => (
@@ -157,8 +146,7 @@ onMounted(() => {
         <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
           <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
             <a :href="`https://www.imdb.com/title/${film.imdb}`">
-              <title class="inline-block mb-
-                                             text-2xl">{{ film.original_title }}</title>
+              <title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title>
               <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
                 class="md:group-hover:scale-95">
             </a>

@@ -106,7 +106,8 @@ const computeGridStyles = () => {
   }
 }
 onMounted(() => {
-  compareBothActorsFilmographies(actor1.value, actor2.value)
+  //run the function on page load
+  // compareBothActorsFilmographies(actor1.value, actor2.value)
 })
 </script>
 

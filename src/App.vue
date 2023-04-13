@@ -150,7 +150,7 @@ onMounted(() => {
               <title class="inline-block mb-
                              text-2xl">{{ film.original_title }}</title>
               <img v-if="showImages" :src=generateImageLink(film.poster_path)
-                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-105">
+                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95">
             </a>
           </li>
         </ul>

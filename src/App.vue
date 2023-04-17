@@ -61,43 +61,39 @@ const getActorFilmography = async (actorName) => {
 }
 
 const compareBothActorsFilmographies = async (firstActor, secondActor) => {
-  //set is loading to true
   isLoading.value = true
-
-  //clear actorpictures array before adding new images
   actorPictures.value = []
 
-  //get the filmographies of both actors and turn them into arrays
-  const actor1Filmography = await getActorFilmography(firstActor)
-  const actor2Filmography = await getActorFilmography(secondActor)
-  const actor2FilmographyIds = actor2Filmography.map(movie => movie.id)
+  //get actorFilmographies
+  const [firstActorFilms, secondActorFilms] = await Promise.all([
+    getActorFilmography(firstActor),
+    getActorFilmography(secondActor),
+  ]);
 
-  //check films have the same id, then filter the array to only include the common film objects
-  let commonFilms = actor1Filmography.filter(movie => actor2FilmographyIds.includes(movie.id))
+  const commonFilmIds = new Set(secondActorFilms.map(movie => movie.id));
 
-  //add external ids to each film object
-  commonFilms.forEach(async (movie) => {
-    const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams)
-    movie.imdb = externalIds.data.imdb_id
-  })
+  const commonFilms = [];
+  for (const movie of firstActorFilms) {
+    if (commonFilmIds.has(movie.id)) {
+      const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams);
+      movie.imdb = externalIds.data.imdb_id;
+      commonFilms.push(movie);
+    }
+  }
 
-  //check and remove films with duplicate ids (some actors are in films twice)
-  commonFilms = commonFilms.filter((film, index, self) =>
-    index === self.findIndex((t) => (
-      t.id === film.id
-    ))
-  )
-  //now order films by release_date (newest first)
-  commonFilms = commonFilms.sort((a, b) => {
-    return new Date(b.release_date) - new Date(a.release_date)
-  })
-  actorsCommonFilms.value = [...commonFilms]
-  //set is loading to false
-  loadingOffset.value > 0 ? setTimeout(() => {
-    isLoading.value = false
-  }, loadingOffset.value) : isLoading.value = false
+  const sortedFilms = commonFilms
+    .sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
+
+  const uniqueFilms = Array.from(new Set(sortedFilms.map(film => film.id)))
+    .map(id => sortedFilms.find(film => film.id === id));
+
+  actorsCommonFilms.value = uniqueFilms;
+  await new Promise(resolve => setTimeout(resolve, loadingOffset.value));
+  isLoading.value = false;
+
   console.log(actorsCommonFilms.value, isLoading)
 }
+
 const computeGridStyles = () => {
   //if images are shown, add responsive grid classes
   if (showImages.value) {

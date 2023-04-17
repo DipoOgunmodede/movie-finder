@@ -3,6 +3,8 @@ import axios from 'axios'
 import { ref, onMounted } from 'vue'
 const actor1 = ref('50 Cent')
 const actor2 = ref('Miranda Hart')
+const currentActor = ref('Tom Hanks')
+const actorsForComparison = ref('')
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
 const showImages = ref(true)
@@ -12,6 +14,19 @@ const queryParams = {
   params: {
     api_key: "c92bac37a196e6559bcb667ecb49b1e1",
   },
+}
+
+const addActorName = (actorName) => {
+  actorsForComparison.value = [...actorsForComparison.value, actorName];
+};
+
+const addActor = () => {
+  console.log("fuck this shit")
+  if (currentActor.value.trim() !== '') {
+    addActorName(currentActor.value.trim());
+    console.log(actorsForComparison.value)
+    currentActor.value = '';
+  }
 }
 const getActorIdFromName = async (actorName) => {
   //search tmdb for actor name and return their id
@@ -60,39 +75,40 @@ const getActorFilmography = async (actorName) => {
   return movieCredits.data.cast
 }
 
-const compareBothActorsFilmographies = async (firstActor, secondActor) => {
-  isLoading.value = true
-  actorPictures.value = []
+const compareActorsFilmographies = async (actorsForComparison) => {
+  isLoading.value = true;
+  actorPictures.value = [];
 
-  //get actorFilmographies
-  const [firstActorFilms, secondActorFilms] = await Promise.all([
-    getActorFilmography(firstActor),
-    getActorFilmography(secondActor),
-  ]);
+  // get actor filmographies
+  const actorFilmographies = await Promise.all(actorsForComparison.map(getActorFilmography));
 
-  const commonFilmIds = new Set(secondActorFilms.map(movie => movie.id));
-
+  // find common films by ID
+  const commonFilmIds = new Set(actorFilmographies[0].map(movie => movie.id));
   const commonFilms = [];
-  for (const movie of firstActorFilms) {
-    if (commonFilmIds.has(movie.id)) {
-      const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams);
-      movie.imdb = externalIds.data.imdb_id;
-      commonFilms.push(movie);
+  for (let i = 1; i < actorFilmographies.length; i++) {
+    const actorFilms = actorFilmographies[i];
+    for (const movie of actorFilms) {
+      if (commonFilmIds.has(movie.id)) {
+        const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams);
+        movie.imdb = externalIds.data.imdb_id;
+        commonFilms.push(movie);
+      }
     }
   }
 
-  const sortedFilms = commonFilms
-    .sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
+  // remove duplicate films
+  const uniqueCommonFilms = commonFilms.filter((film, index, self) => {
+    return index === self.findIndex(otherFilm => otherFilm.id === film.id);
+  });
 
-  const uniqueFilms = Array.from(new Set(sortedFilms.map(film => film.id)))
-    .map(id => sortedFilms.find(film => film.id === id));
+  // sort films by release date (newest first)
+  uniqueCommonFilms.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
 
-  actorsCommonFilms.value = uniqueFilms;
-  await new Promise(resolve => setTimeout(resolve, loadingOffset.value));
+  actorsCommonFilms.value = uniqueCommonFilms;
   isLoading.value = false;
+};
 
-  console.log(actorsCommonFilms.value, isLoading)
-}
+
 
 const computeGridStyles = () => {
   //if images are shown, add responsive grid classes
@@ -104,7 +120,7 @@ const computeGridStyles = () => {
 }
 onMounted(() => {
   //run the function on page load
-  // compareBothActorsFilmographies(actor1.value, actor2.value)
+  // compareActorsFilmographies(actor1.value, actor2.value)
 })
 </script>
 
@@ -114,21 +130,29 @@ onMounted(() => {
     <div class="flex flex-col justify-center gap-4">
       <transition name="fade">
         <div v-if="isLoading"
-          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col md:flex-row gap-6 justify-center items-center z-10">
-          <p class="text-2xl animate-pulse">{{ actor1 }} & {{ actor2 }}</p>
+          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-center items-center z-10">
+          <p class="text-2xl animate-pulse block" v-for="actor in actorsForComparison">{{actor}}</p>
           <img v-for="actor in actorPictures" :src="actor" class="h-64 w-64 rounded-full object-cover animate-spin" />
         </div>
       </transition>
-      <label class="dark:text-white flex flex-col gap-2">
-        Actor 1
-        <input type="text" class="actor actor1 text-black border border-black dark:border-white p-2" v-model="actor1"
-          placeholder="Search for an actor" @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
+      <!-- <label class="dark:text-white flex flex-col gap-2">
+              Actor 1
+              <input type="text" class="actor actor1 text-black border border-black dark:border-white p-2" v-model="actor1"
+                placeholder="Search for an actor" @keyup.enter="compareActorsFilmographies(actor1, actor2)" />
+            </label>
+            <label class="dark:text-white flex flex-col gap-2">
+              Actor 2
+              <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2" v-model="actor2"
+                placeholder="Search for an actor" @keyup.enter="compareActorsFilmographies(actor1, actor2)" />
+            </label> -->
+      <label>
+        Add two or more actors <div>
+          <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2"  v-model="currentActor" @keydown.enter="addActor" placeholder="Add actor">
+        </div>
       </label>
-      <label class="dark:text-white flex flex-col gap-2">
-        Actor 2
-        <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2" v-model="actor2"
-          placeholder="Search for an actor" @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
-      </label>
+      <button @click="addActor">Add actor</button>
+
+      <p v-for="actor in actorsForComparison">{{ actor }}</p>
       <details>
         <summary>Options</summary>
         <label class="text-2xl flex">Toggle images? {{ showImages }}
@@ -140,7 +164,7 @@ onMounted(() => {
       </details>
     </div>
 
-    <button @click="compareBothActorsFilmographies(actor1, actor2)"
+    <button @click="compareActorsFilmographies(actorsForComparison)"
       class="p-4 my-4 border border-black dark:border-white">Compare
       filmographies</button>
     <!-- show list if they have appeared in a film together -->
@@ -209,7 +233,8 @@ onMounted(() => {
                   haven't appeared in a film together on load</span> implemented 13/4/23</li>
               <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
               </li>
-              <li><span class="line-through">show loading screen for longer before showing results</span> implemented 13/4/23</li>
+              <li><span class="line-through">show loading screen for longer before showing results</span> implemented
+                13/4/23</li>
             </ul>
           </details>
         </div>

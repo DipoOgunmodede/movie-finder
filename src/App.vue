@@ -194,14 +194,12 @@ const computeGridStyles = () => {
           <img v-for="actor in actorPictures" :src="actor" class="h-48 w-48 rounded-full object-cover animate-spin" />
         </div>
       </transition>
-      <section class="flex gap-4 my-4">
-        <label>
-          <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2"
-            v-model="currentActor" @keydown.enter="addActor" placeholder="Add actor">
-        </label>
+      <section class="flex gap-4 my-4 ">
+        <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2 w-2/3"
+          v-model="currentActor" @keydown.enter="addActor" placeholder="Add actor">
         <!-- add a button that is disabled and visibly greyed out if the input is empty. use a different text colour when it's disabled-->
         <button @click="addActor" :disabled="currentActor.length < 2"
-          class="border border-black dark:border-white text-black dark:text-white p-2"
+          class="w-1/3 border border-black dark:border-white text-black dark:text-white p-2"
           :class="currentActor.length < 2 ? 'opacity-50 bg-red-700 cursor-not-allowed' : 'bg-green-500'">Add
           actor</button>
       </section>

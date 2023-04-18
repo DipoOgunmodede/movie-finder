@@ -203,7 +203,7 @@ const computeGridStyles = () => {
           :class="currentActor.length < 2 ? 'opacity-50 bg-red-700 cursor-not-allowed' : 'bg-green-500'">Add
           actor</button>
       </section>
-      <ul>Actors being searched:
+      <ul v-if="actorsForComparison.length > 0">Actors being searched:
         <li v-for="actor in actorsForComparison" class="list-disc list-inside"><span>{{ actor }} </span> <button
             @click="removeActor(actor)">- Remove this actor</button>
         </li>

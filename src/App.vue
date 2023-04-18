@@ -116,11 +116,13 @@ const compareActorsFilmographies = async (actorsForComparison) => {
       return index === self.findIndex(otherFilm => otherFilm.id === film.id);
     });
 
+
     // sort films by release date (newest first)
     uniqueCommonFilms.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
 
     // update state variables
     actorsCommonFilms.value = uniqueCommonFilms;
+
     //if loading offset is more than 0 add a set timeout to allow the loading animation to finish
     if (loadingOffset.value > 0) {
       setTimeout(() => {
@@ -229,7 +231,7 @@ const computeGridStyles = () => {
       {{ actorsCommonFilms.length < 2 ? "film" : "films" }} :</h2>
         <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
           <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
-            <a :href="`https://www.imdb.com/title/${film.imdb}`">
+            <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
               <title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title>
               <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
                 class="md:group-hover:scale-95">

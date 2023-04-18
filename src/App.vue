@@ -1,18 +1,45 @@
 <script setup>
 import axios from 'axios'
+import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
-const actor1 = ref('50 Cent')
-const actor2 = ref('Miranda Hart')
+const currentActor = ref('')
+const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
 const showImages = ref(true)
 const isLoading = ref(false)
 const loadingOffset = ref(0)
+//const default settings is true when loading offset isn't 0 and/or show images is false
 const queryParams = {
   params: {
     api_key: "c92bac37a196e6559bcb667ecb49b1e1",
   },
 }
+
+const addActorName = (actorName) => {
+  actorsForComparison.value = [...actorsForComparison.value, actorName];
+};
+
+const addActor = () => {
+  if (currentActor.value.trim() !== '') {
+    addActorName(currentActor.value.trim());
+    console.log(actorsForComparison.value)
+    currentActor.value = '';
+  }
+}
+
+const openSettingsCheck = () => {
+  //if localstorage values are anything other than the default values, open the details element
+  if (loadingOffset.value !== 0 || showImages.value === false) {
+    document.getElementById('settings').open = true
+  }
+}
+
+//add a method to remove an actor from the array on element click, but keeping the rest
+const removeActor = (actorName) => {
+  actorsForComparison.value = actorsForComparison.value.filter(actor => actor !== actorName)
+}
+
 const getActorIdFromName = async (actorName) => {
   //search tmdb for actor name and return their id
   const idPromise = await axios.get(
@@ -50,49 +77,99 @@ const getActorFilmography = async (actorName) => {
 
   //get the movie credits from the actor id
   const movieCredits = await getMovieCreditsByActorId(actorId.data.results[0].id)
-
-  //add external ids to each film object
-  movieCredits.data.cast.forEach(async (movie) => {
-    const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams)
-    movie.imdb = externalIds.data.imdb_id
-  })
   console.log(movieCredits.data.cast)
   return movieCredits.data.cast
 }
 
-const compareBothActorsFilmographies = async (firstActor, secondActor) => {
-  isLoading.value = true
-  actorPictures.value = []
+const compareActorsFilmographies = async (actorsForComparison) => {
+  try {
+    // show loading spinner
+    isLoading.value = true;
+    actorPictures.value = [];
 
-  //get actorFilmographies
-  const [firstActorFilms, secondActorFilms] = await Promise.all([
-    getActorFilmography(firstActor),
-    getActorFilmography(secondActor),
-  ]);
+    // get actor filmographies
+    const actorFilmographies = await Promise.all(actorsForComparison.map(getActorFilmography));
+    console.log(actorFilmographies);
 
-  const commonFilmIds = new Set(secondActorFilms.map(movie => movie.id));
-
-  const commonFilms = [];
-  for (const movie of firstActorFilms) {
-    if (commonFilmIds.has(movie.id)) {
-      const externalIds = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, queryParams);
-      movie.imdb = externalIds.data.imdb_id;
-      commonFilms.push(movie);
+    // find common films by ID
+    const commonFilmIds = new Set(actorFilmographies[0].map(movie => movie.id));
+    for (let i = 1; i < actorFilmographies.length; i++) {
+      const actorFilms = actorFilmographies[i];
+      const actorFilmIds = new Set(actorFilms.map(movie => movie.id));
+      commonFilmIds.forEach(id => {
+        if (!actorFilmIds.has(id)) {
+          commonFilmIds.delete(id);
+        }
+      });
     }
+
+    // get common films with all actors
+    const commonFilms = await Promise.all(Array.from(commonFilmIds).map(async commonFilmId => {
+      const response = await axios.get(`https://api.themoviedb.org/3/movie/${commonFilmId}`, { ...queryParams, append_to_response: 'external_ids' });
+      const { id, title, release_date, poster_path, imdb_id } = response.data;
+      return { id, title, release_date, poster_path, imdb_id };
+    }));
+
+
+    // remove duplicate films
+    const uniqueCommonFilms = commonFilms.filter((film, index, self) => {
+      return index === self.findIndex(otherFilm => otherFilm.id === film.id);
+    });
+
+    // sort films by release date (newest first)
+    uniqueCommonFilms.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
+
+    // update state variables
+    actorsCommonFilms.value = uniqueCommonFilms;
+    //if loading offset is more than 0 add a set timeout to allow the loading animation to finish
+    if (loadingOffset.value > 0) {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, loadingOffset.value)
+    } else {
+      isLoading.value = false;
+    }
+  } catch (error) {
+    console.error(error);
+    // handle error by displaying an error message to the user
   }
+};
 
-  const sortedFilms = commonFilms
-    .sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
-
-  const uniqueFilms = Array.from(new Set(sortedFilms.map(film => film.id)))
-    .map(id => sortedFilms.find(film => film.id === id));
-
-  actorsCommonFilms.value = uniqueFilms;
-  await new Promise(resolve => setTimeout(resolve, loadingOffset.value));
-  isLoading.value = false;
-
-  console.log(actorsCommonFilms.value, isLoading)
+//save showimages, actors for comparison and loadingOffset values to localStorage
+const saveLocalStorage = () => {
+  localStorage.setItem('loadingOffset', loadingOffset.value)
+  localStorage.setItem('showImages', showImages.value)
+  localStorage.setItem('actorsForComparison', JSON.stringify(actorsForComparison.value))
 }
+
+const checkLocalStorage = () => {
+  // check if localStorage items exist
+  const loadingOffsetLocalStorage = localStorage.getItem('loadingOffset')
+  const showImagesLocalStorage = localStorage.getItem('showImages')
+  const actorsForComparisonLocalStorage = localStorage.getItem('actorsForComparison')
+
+  // if localStorage items exist, update the variables with their values
+  if (loadingOffsetLocalStorage) {
+    loadingOffset.value = Number(loadingOffsetLocalStorage)
+  }
+  if (showImagesLocalStorage) {
+    showImages.value = showImagesLocalStorage === 'true'
+  }
+  if (actorsForComparisonLocalStorage) {
+    actorsForComparison.value = JSON.parse(actorsForComparisonLocalStorage)
+  }
+}
+
+//update local storage settings every time loadingoffset, showimages or actorsforcomparison changes
+watch([loadingOffset, showImages, actorsForComparison], () => {
+  saveLocalStorage()
+})
+
+onMounted(() => {
+  //check if cookies exist
+  checkLocalStorage()
+  openSettingsCheck()
+})
 
 const computeGridStyles = () => {
   //if images are shown, add responsive grid classes
@@ -102,45 +179,47 @@ const computeGridStyles = () => {
     return ""
   }
 }
-onMounted(() => {
-  //run the function on page load
-  // compareBothActorsFilmographies(actor1.value, actor2.value)
-})
 </script>
 
 <template>
   <div class="flex flex-col justify-center dark:text-white p-4">
-    <p>This is an extremely rough prototype for an app that tells you which films actors have been in together.</p>
+    <p>This is an extremely basic prototype for an app that tells you which films actors have been in together.</p>
     <div class="flex flex-col justify-center gap-4">
       <transition name="fade">
         <div v-if="isLoading"
-          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col md:flex-row gap-6 justify-center items-center z-10">
-          <p class="text-2xl animate-pulse">{{ actor1 }} & {{ actor2 }}</p>
-          <img v-for="actor in actorPictures" :src="actor" class="h-64 w-64 rounded-full object-cover animate-spin" />
+          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-center items-center z-10">
+          <ul class="flex flex-col gap-4">
+            <li class="animate-pulse block" v-for="actor in actorsForComparison">{{ actor }}</li>
+          </ul>
+          <img v-for="actor in actorPictures" :src="actor" class="h-48 w-48 rounded-full object-cover animate-spin" />
         </div>
       </transition>
-      <label class="dark:text-white flex flex-col gap-2">
-        Actor 1
-        <input type="text" class="actor actor1 text-black border border-black dark:border-white p-2" v-model="actor1"
-          placeholder="Search for an actor" @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
-      </label>
-      <label class="dark:text-white flex flex-col gap-2">
-        Actor 2
-        <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2" v-model="actor2"
-          placeholder="Search for an actor" @keyup.enter="compareBothActorsFilmographies(actor1, actor2)" />
-      </label>
-      <details>
-        <summary>Options</summary>
-        <label class="text-2xl flex">Toggle images? {{ showImages }}
+      <section class="flex gap-4 my-4 ">
+        <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2 w-2/3"
+          v-model="currentActor" @keydown.enter="addActor" placeholder="Add actor">
+        <!-- add a button that is disabled and visibly greyed out if the input is empty. use a different text colour when it's disabled-->
+        <button @click="addActor" :disabled="currentActor.length < 2"
+          class="w-1/3 border border-black dark:border-white text-black dark:text-white p-2"
+          :class="currentActor.length < 2 ? 'opacity-50 bg-red-700 cursor-not-allowed' : 'bg-green-500'">Add
+          actor</button>
+      </section>
+      <ul>Actors being searched:
+        <li v-for="actor in actorsForComparison" class="list-disc list-inside"><span>{{ actor }} </span> <button
+            @click="removeActor(actor)">- Remove this actor</button>
+        </li>
+      </ul>
+      <details id="settings">
+        <summary>Visual settings</summary>
+        <label class="text-xl flex">Toggle images? {{ showImages }}
           <input type="checkbox" v-model="showImages" class="ml-4 scale-150" />
         </label>
-        <label class="text-2xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
+        <label class="text-xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
           <input type="range" v-model="loadingOffset" min="0" max="2500" step="100" class="w-full md:w-1/2" />
         </label>
       </details>
     </div>
 
-    <button @click="compareBothActorsFilmographies(actor1, actor2)"
+    <button @click="compareActorsFilmographies(actorsForComparison)"
       class="p-4 my-4 border border-black dark:border-white">Compare
       filmographies</button>
     <!-- show list if they have appeared in a film together -->
@@ -209,10 +288,12 @@ onMounted(() => {
                   haven't appeared in a film together on load</span> implemented 13/4/23</li>
               <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
               </li>
-              <li><span class="line-through">show loading screen for longer before showing results</span> implemented 13/4/23</li>
+              <li><span class="line-through">show loading screen for longer before showing results</span> implemented
+                13/4/23</li>
             </ul>
           </details>
         </div>
   </div>
+  <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
 </template>
 

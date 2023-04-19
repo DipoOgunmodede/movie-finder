@@ -221,7 +221,7 @@ const computeGridStyles = () => {
           <input type="checkbox" v-model="showImages" class="ml-4 scale-150" />
         </label>
         <label class="text-xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
-          <input type="range" v-model="loadingOffset" min="0" max="3000" step="100" class="w-full md:w-1/2" />
+          <input type="range" v-model="loadingOffset" min="0" max="3000" step="50" class="w-full md:w-1/2" />
         </label>
       </details>
     </div>
@@ -232,7 +232,7 @@ const computeGridStyles = () => {
         <p>{{ actorsForComparison.join(', ') }}</p>
         <div class="flex flex-wrap justify-around gap-4">
           <img v-for="actor in actorPictures" :src="actor"
-            class="w-32 aspect-square rounded-full object-cover animate-spin" />
+            class="w-32 aspect-square rounded-full object-cover animate-spin motion-reduce:animate-pulse" />
         </div>
       </div>
     </transition>

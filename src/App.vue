@@ -304,5 +304,6 @@ const computeGridStyles = () => {
         </div>
   </div>
   <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
+  <a href="https://www.flaticon.com/free-icons/film" title="film icons">Film icons created by bukeicon - Flaticon</a>
 </template>
 

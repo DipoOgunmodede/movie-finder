@@ -28,6 +28,12 @@ const addActor = () => {
   }
 }
 
+const undoActor = () => {
+  currentActor.value = actorsForComparison.value[actorsForComparison.value.length - 1]
+  actorsForComparison.value.pop();
+}
+
+
 const openSettingsCheck = () => {
   //if localstorage values are anything other than the default values, open the details element
   if (loadingOffset.value !== 0 || showImages.value === false) {
@@ -290,6 +296,7 @@ const computeGridStyles = () => {
               </li>
               <li><span class="line-through">show loading screen for longer before showing results</span> implemented
                 13/4/23</li>
+              <li>Implement vue draggable to drag actors into a "bucket" for comparison - vue sortable</li>
             </ul>
           </details>
         </div>

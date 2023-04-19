@@ -137,11 +137,23 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     } else {
       isLoading.value = false;
     }
+    actorsComparisonText();
   } catch (error) {
     console.error(error);
     // handle error by displaying an error message to the user
   }
 };
+const actorsComparisonText = () => {
+  if (this.actorsForComparison.length === 0) {
+    return '';
+  }
+  const actorsList = this.actorsForComparison.length > 1
+    ? `${this.actorsForComparison.slice(0, -1).join(', ')} and ${this.actorsForComparison.slice(-1)}`
+    : this.actorsForComparison[0];
+  const filmsText = this.actorsCommonFilms.length > 1 ? 'films' : 'film';
+  return `${actorsList} have been in the following ${this.actorsCommonFilms.length} ${filmsText}:`;
+}
+
 
 //save showimages, actors for comparison and loadingOffset values to localStorage
 const saveLocalStorage = () => {
@@ -228,81 +240,85 @@ const computeGridStyles = () => {
     </div>
 
     <button @click="compareActorsFilmographies(actorsForComparison)"
-      class="p-4 my-4 border border-black dark:border-white">Compare
-      filmographies</button>
+  class="p-4 my-4 border border-black dark:border-white bg-green-500 disabled:bg-red-700 disabled:cursor-not-allowed"
+  :disabled="actorsForComparison.length < 2">Compare filmographies</button>
+
     <!-- show list if they have appeared in a film together -->
-    <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">These actors <span class="text-xs">(or
-        actresses)</span> have been in the
-      following {{ actorsCommonFilms.length }}
-      {{ actorsCommonFilms.length < 2 ? "film" : "films" }} :</h2>
-        <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
-          <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
-            <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
-              <title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title>
-              <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
-                class="md:group-hover:scale-95">
-            </a>
-          </li>
+    <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
+      {{ actorsForComparison.length > 1 ? actorsForComparison.slice(0, -1).join(', ') + ' and ' +
+        actorsForComparison.slice(-1) : actorsForComparison[0] }}
+      {{ actorsCommonFilms.length > 1 ? 'have' : 'has' }} been in the following {{ actorsCommonFilms.length }} {{
+        actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
+    </h2>
+
+    <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
+      <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
+        <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
+          <title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title>
+          <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
+            class="md:group-hover:scale-95">
+        </a>
+      </li>
+    </ul>
+    <h2 class="text-4xl underline" v-text=""></h2>
+    <div class="border border-black dark:border-white p-4 my-4">
+      <details>
+        <summary>Current limitations (I won't be fixing these):</summary>
+        <ul class="list-disc list-inside">
+          <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom
+            Cruise's ID</li>
+          <li>While case insensitive, there is no way to handle typos</li>
+          <li>The app only searches for the first result returned by the API. If there are multiple actors with the
+            exact
+            same name, the app will only search for the first result.</li>
+          <li>You can search the same person twice</li>
+
         </ul>
-        <h2 class="text-4xl underline" v-if="actorsCommonFilms == ''"> These actors have not been in a film
-          together</h2>
-        <div class="border border-black dark:border-white p-4 my-4">
-          <details>
-            <summary>Current limitations (I won't be fixing these):</summary>
-            <ul class="list-disc list-inside">
-              <li>The API accepts any string meaning actors can be searched with just one name, e.g. Cruise returns Tom
-                Cruise's ID</li>
-              <li>While case insensitive, there is no way to handle typos</li>
-              <li>The app only searches for the first result returned by the API. If there are multiple actors with the
-                exact
-                same name, the app will only search for the first result.</li>
-              <li>You can search the same person twice</li>
+      </details>
 
-            </ul>
-          </details>
-
-          <details>
-            <summary>Future improvements:</summary>
-            <ul class="list-disc list-inside">
-              <li>Overhaul design completely</li>
-              <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
-              <li>Carousel display</li>
-              <li>Properly obfuscate API key</li>
-              <li><span class="line-through">Image toggle, probably with <code class="text-code">v-if</code></span>
-                implemented 31/3/23</li>
-              <li><span class="line-through">Dark mode toggle using <code
-                    class="text-code">@media (prefers-color-scheme)</code></span> implemented 4/4/23</li>
-              <li class="line-through">Hyperlink the film titles to the film page on TMBD/imdb</li>
-              <li><span class="line-through">Order list by reverse chronology</span>implemented 5/4/23</li>
-              <li><span class="line-through">Hard coded "films", there is no handling of a single film being
-                  returned</span> implemented 4/4/23</li>
-              <li>Show data as a venn diagram(?)</li>
-              <li>Allow user to search for more than 2 actors</li>
-              <li><span class="line-through">Show user feedback while API query happens ("Searching...")</span>implemented
-                13/4/23</li>
-              <li><span class="line-through">Fixed bug where double credited actors would show two listings</span></li>
-              <li><span class="line-through">The message about the actors not being in a film together is the default
-                  condition because the <code class="text-code">v-else</code>
-                  is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is
-                  truthy
-                  onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more
-                  event
-                  listening.</span>implemented 13/4/23</li>
-              <li><span class="line-through">Add error handling for typos/no results</span>implemented 13/4/23</li>
-              <li><span class="line-through">Interpolate the actors names into the message about them not being in a film
-                  together, but only after
-                  the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
-                  <code>$actor2</code>
-                  haven't appeared in a film together on load</span> implemented 13/4/23</li>
-              <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
-              </li>
-              <li><span class="line-through">show loading screen for longer before showing results</span> implemented
-                13/4/23</li>
-              <li>Implement vue draggable to drag actors into a "bucket" for comparison - vue sortable</li>
-            </ul>
-          </details>
-        </div>
+      <details>
+        <summary>Future improvements:</summary>
+        <ul class="list-disc list-inside">
+          <li>Overhaul design completely</li>
+          <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
+          <li>Carousel display</li>
+          <li>Properly obfuscate API key</li>
+          <li><span class="line-through">Image toggle, probably with <code class="text-code">v-if</code></span>
+            implemented 31/3/23</li>
+          <li><span class="line-through">Dark mode toggle using <code
+                class="text-code">@media (prefers-color-scheme)</code></span> implemented 4/4/23</li>
+          <li class="line-through">Hyperlink the film titles to the film page on TMBD/imdb</li>
+          <li><span class="line-through">Order list by reverse chronology</span>implemented 5/4/23</li>
+          <li><span class="line-through">Hard coded "films", there is no handling of a single film being
+              returned</span> implemented 4/4/23</li>
+          <li>Show data as a venn diagram(?)</li>
+          <li><span class="line-through">Allow user to search for more than 2 actors</span>implemented 18/4/23</li>
+          <li><span class="line-through">Show user feedback while API query happens ("Searching...")</span>implemented
+            13/4/23</li>
+          <li><span class="line-through">Fixed bug where double credited actors would show two listings</span></li>
+          <li><span class="line-through">The message about the actors not being in a film together is the default
+              condition because the <code class="text-code">v-else</code>
+              is hit immediately on pageload (<code class="text-code">actorsCommonFilms</code>, an empty array, is
+              truthy
+              onload). I will bind this to a check on enter keyup, input focus change and button click. Basically more
+              event
+              listening.</span>implemented 13/4/23</li>
+          <li><span class="line-through">Add error handling for typos/no results</span>implemented 13/4/23</li>
+          <li><span class="line-through">Interpolate the actors names into the message about them not being in a film
+              together, but only after
+              the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
+              <code>$actor2</code>
+              haven't appeared in a film together on load</span> implemented 13/4/23</li>
+          <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
+          </li>
+          <li><span class="line-through">show loading screen for longer before showing results</span> implemented
+            13/4/23</li>
+          <li>Implement vue draggable to drag actors into a "bucket" for comparison - vue sortable</li>
+        </ul>
+      </details>
+    </div>
   </div>
   <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
+  <a href="https://www.flaticon.com/free-icons/film" title="film icons">Film icons created by bukeicon - Flaticon</a>
 </template>
 

@@ -33,7 +33,6 @@ const undoActor = () => {
   actorsForComparison.value.pop();
 }
 
-
 const openSettingsCheck = () => {
   //if localstorage values are anything other than the default values, open the details element
   if (loadingOffset.value !== 0 || showImages.value === false) {
@@ -128,7 +127,6 @@ const compareActorsFilmographies = async (actorsForComparison) => {
 
     // update state variables
     actorsCommonFilms.value = uniqueCommonFilms;
-    debugger
     //if loading offset is more than 0 add a set timeout to allow the loading animation to finish
     if (loadingOffset.value > 0) {
       setTimeout(() => {
@@ -137,7 +135,6 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     } else {
       isLoading.value = false;
     }
-    actorsComparisonText();
   } catch (error) {
     console.error(error);
     // handle error by displaying an error message to the user
@@ -153,7 +150,6 @@ const actorsComparisonText = () => {
   const filmsText = this.actorsCommonFilms.length > 1 ? 'films' : 'film';
   return `${actorsList} have been in the following ${this.actorsCommonFilms.length} ${filmsText}:`;
 }
-
 
 //save showimages, actors for comparison and loadingOffset values to localStorage
 const saveLocalStorage = () => {
@@ -205,15 +201,6 @@ const computeGridStyles = () => {
   <div class="flex flex-col justify-center dark:text-white p-4">
     <p>This is an extremely basic prototype for an app that tells you which films actors have been in together.</p>
     <div class="flex flex-col justify-center gap-4">
-      <transition name="fade">
-        <div v-if="isLoading"
-          class="loading-overlay p-4 absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-center items-center z-10">
-          <p v-if="actorsForComparison.length > 0">Looking up filmographies for the following:</p>
-          <p>{{ actorsForComparison.join(', ') }}</p>
-          <div class="grid grid-cols-2 gap-4"><img v-for="actor in actorPictures" :src="actor"
-              class="h-48 w-48 rounded-full object-cover animate-spin" /></div>
-        </div>
-      </transition>
       <section class="flex gap-4 my-4 ">
         <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2 w-2/3"
           v-model="currentActor" @keydown.enter="addActor" placeholder="Add actor">
@@ -234,10 +221,22 @@ const computeGridStyles = () => {
           <input type="checkbox" v-model="showImages" class="ml-4 scale-150" />
         </label>
         <label class="text-xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
-          <input type="range" v-model="loadingOffset" min="0" max="2500" step="100" class="w-full md:w-1/2" />
+          <input type="range" v-model="loadingOffset" min="0" max="3000" step="100" class="w-full md:w-1/2" />
         </label>
       </details>
     </div>
+    <transition name="fade" v-if="isLoading">
+      <div
+        class="loading-overlay overflow-hidden p-4 fixed inset-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-items-center z-10">
+        <p v-if="actorsForComparison.length > 0">Looking up filmographies for the following:</p>
+        <p>{{ actorsForComparison.join(', ') }}</p>
+        <div class="flex flex-wrap justify-around gap-4">
+          <img v-for="actor in actorPictures" :src="actor"
+            class="w-32 aspect-square rounded-full object-cover animate-spin" />
+        </div>
+      </div>
+    </transition>
+
 
     <button @click="compareActorsFilmographies(actorsForComparison)"
       class="p-4 my-4 border border-black dark:border-white bg-green-500 disabled:bg-red-700 disabled:cursor-not-allowed"
@@ -272,6 +271,7 @@ const computeGridStyles = () => {
             exact
             same name, the app will only search for the first result.</li>
           <li>You can search the same person twice</li>
+          <li>Searching for more than like 4-5 actors won't look great cos their images will be cut off by <code>overflow:hidden;</code></li>
 
         </ul>
       </details>

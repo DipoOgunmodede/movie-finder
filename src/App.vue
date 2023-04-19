@@ -128,7 +128,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
 
     // update state variables
     actorsCommonFilms.value = uniqueCommonFilms;
-
+    debugger
     //if loading offset is more than 0 add a set timeout to allow the loading animation to finish
     if (loadingOffset.value > 0) {
       setTimeout(() => {
@@ -207,11 +207,11 @@ const computeGridStyles = () => {
     <div class="flex flex-col justify-center gap-4">
       <transition name="fade">
         <div v-if="isLoading"
-          class="absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-center items-center z-10">
-          <ul class="flex flex-col gap-4">
-            <li class="animate-pulse block" v-for="actor in actorsForComparison">{{ actor }}</li>
-          </ul>
-          <img v-for="actor in actorPictures" :src="actor" class="h-48 w-48 rounded-full object-cover animate-spin" />
+          class="loading-overlay p-4 absolute top-0 left-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-center items-center z-10">
+          <p v-if="actorsForComparison.length > 0">Looking up filmographies for the following:</p>
+          <p>{{ actorsForComparison.join(', ') }}</p>
+          <div class="grid grid-cols-2 gap-4"><img v-for="actor in actorPictures" :src="actor"
+              class="h-48 w-48 rounded-full object-cover animate-spin" /></div>
         </div>
       </transition>
       <section class="flex gap-4 my-4 ">
@@ -240,8 +240,8 @@ const computeGridStyles = () => {
     </div>
 
     <button @click="compareActorsFilmographies(actorsForComparison)"
-  class="p-4 my-4 border border-black dark:border-white bg-green-500 disabled:bg-red-700 disabled:cursor-not-allowed"
-  :disabled="actorsForComparison.length < 2">Compare filmographies</button>
+      class="p-4 my-4 border border-black dark:border-white bg-green-500 disabled:bg-red-700 disabled:cursor-not-allowed"
+      :disabled="actorsForComparison.length < 2">Compare filmographies</button>
 
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
@@ -260,7 +260,7 @@ const computeGridStyles = () => {
         </a>
       </li>
     </ul>
-    <h2 class="text-4xl underline" v-text=""></h2>
+    <h2 class="text-4xl underline"></h2>
     <div class="border border-black dark:border-white p-4 my-4">
       <details>
         <summary>Current limitations (I won't be fixing these):</summary>

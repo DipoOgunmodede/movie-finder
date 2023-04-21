@@ -232,7 +232,7 @@ const computeGridStyles = () => {
         <p>{{ actorsForComparison.join(', ') }}</p>
         <div class="flex flex-wrap justify-around gap-4">
           <img v-for="actor in actorPictures" :src="actor"
-            class="w-32 aspect-square rounded-full object-cover animate-spin motion-reduce:animate-pulse" />
+            class="w-32 aspect-square rounded-full object-cover animate-spin" />
         </div>
       </div>
     </transition>

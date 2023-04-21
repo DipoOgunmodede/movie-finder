@@ -108,13 +108,21 @@ const compareActorsFilmographies = async (actorsForComparison) => {
       });
     }
 
+
+
     // get common films with all actors
     const commonFilms = await Promise.all(Array.from(commonFilmIds).map(async commonFilmId => {
       const response = await axios.get(`https://api.themoviedb.org/3/movie/${commonFilmId}`, { ...queryParams, append_to_response: 'external_ids' });
       const { id, title, release_date, poster_path, imdb_id } = response.data;
-      return { id, title, release_date, poster_path, imdb_id };
-    }));
 
+      // get character names for every actor in the film
+      const characterNames = actorFilmographies.map(actorFilms => {
+        const movie = actorFilms.find(movie => movie.id === commonFilmId);
+        return movie ? movie.character : '';
+      });
+
+      return { id, title, release_date, poster_path, imdb_id, characterNames };
+    }));
 
     // remove duplicate films
     const uniqueCommonFilms = commonFilms.filter((film, index, self) => {
@@ -127,6 +135,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
 
     // update state variables
     actorsCommonFilms.value = uniqueCommonFilms;
+    console.log(actorsCommonFilms.value)
     //if loading offset is more than 0 add a set timeout to allow the loading animation to finish
     if (loadingOffset.value > 0) {
       setTimeout(() => {
@@ -259,6 +268,7 @@ const computeGridStyles = () => {
         </a>
       </li>
     </ul>
+    
     <h2 class="text-4xl underline"></h2>
     <div class="border border-black dark:border-white p-4 my-4">
       <details>
@@ -271,7 +281,8 @@ const computeGridStyles = () => {
             exact
             same name, the app will only search for the first result.</li>
           <li>You can search the same person twice</li>
-          <li>Searching for more than like 4-5 actors won't look great cos their images will be cut off by <code>overflow:hidden;</code></li>
+          <li>Searching for more than like 4-5 actors won't look great cos their images will be cut off by
+            <code>overflow:hidden;</code></li>
 
         </ul>
       </details>

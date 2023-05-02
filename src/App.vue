@@ -91,7 +91,12 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     // show loading spinner
     isLoading.value = true;
     actorPictures.value = [];
-
+    const uniqueActors = new Set(actorsForComparison);
+    if (uniqueActors.size !== actorsForComparison.length) {
+      alert('Duplicate actors(s) entered.');
+      isLoading.value = false;
+      return;
+    }
     // get actor filmographies
     const actorFilmographies = await Promise.all(actorsForComparison.map(getActorFilmography));
     console.log(actorFilmographies);
@@ -255,20 +260,28 @@ const computeGridStyles = () => {
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
       {{ actorsForComparison.length > 1 ? actorsForComparison.slice(0, -1).join(', ') + ' and ' +
         actorsForComparison.slice(-1) : actorsForComparison[0] }}
-      {{ actorsCommonFilms.length > 1 ? 'have' : 'has' }} been in the following {{ actorsCommonFilms.length }} {{
+      have been in the following {{ actorsCommonFilms.length }} {{
         actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
     </h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
-        <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
-          <title class="inline-block mb-2 text-2xl">{{ film.original_title }}</title>
-          <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
-            class="md:group-hover:scale-95">
-        </a>
+        <div class="card">
+          <div class="front">
+            <!-- <a :href="`https://www.imdb.com/title/${film.imdb_id}`"> -->
+            <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
+              class="md:group-hover:scale-95">
+            <!-- </a> -->
+          </div>
+          <div class="back">
+            <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
+              <h2>{{ film.original_title }}</h2>
+              <p>{{ film.overview }}</p>
+            </a>
+          </div>
+        </div>
       </li>
     </ul>
-    
     <h2 class="text-4xl underline"></h2>
     <div class="border border-black dark:border-white p-4 my-4">
       <details>
@@ -282,7 +295,8 @@ const computeGridStyles = () => {
             same name, the app will only search for the first result.</li>
           <li>You can search the same person twice</li>
           <li>Searching for more than like 4-5 actors won't look great cos their images will be cut off by
-            <code>overflow:hidden;</code></li>
+            <code>overflow:hidden;</code>
+          </li>
 
         </ul>
       </details>
@@ -333,3 +347,36 @@ const computeGridStyles = () => {
   <a href="https://www.flaticon.com/free-icons/film" title="film icons">Film icons created by bukeicon - Flaticon</a>
 </template>
 
+<style>
+.card {
+  position: relative;
+  perspective: 1000px;
+  transition: transform 0.8s;
+}
+
+.card:hover {
+  transform: rotateY(180deg);
+}
+
+.front,
+.back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  text-align: center;
+  background-color: #f7fafc;
+  border: 1px solid #cbd5e0;
+}
+</style>

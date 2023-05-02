@@ -28,6 +28,12 @@ const addActor = () => {
   }
 }
 
+const flipCard = (event) => {
+  console.log('card flipped')
+  const card = event.currentTarget.querySelector('.card');
+  card.classList.toggle('is-flipped');
+}
+
 const undoActor = () => {
   currentActor.value = actorsForComparison.value[actorsForComparison.value.length - 1]
   actorsForComparison.value.pop();
@@ -266,22 +272,21 @@ const computeGridStyles = () => {
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
-        <div class="card">
+        <div class="card" @click="flipCard($event)">
           <div class="front">
-            <!-- <a :href="`https://www.imdb.com/title/${film.imdb_id}`"> -->
-            <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
+            <img v-if="showImages" :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
               class="md:group-hover:scale-95">
-            <!-- </a> -->
           </div>
           <div class="back">
-            <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
-              <h2>{{ film.original_title }}</h2>
-              <p>{{ film.overview }}</p>
-            </a>
+            <h2>{{ film.original_title }}</h2>
+            <p>{{ film.overview }}</p>
           </div>
         </div>
       </li>
     </ul>
+
+
+
     <h2 class="text-4xl underline"></h2>
     <div class="border border-black dark:border-white p-4 my-4">
       <details>
@@ -349,34 +354,27 @@ const computeGridStyles = () => {
 
 <style>
 .card {
-  position: relative;
-  perspective: 1000px;
-  transition: transform 0.8s;
-}
-
-.card:hover {
+  transform-style: preserve-3d;
   transform: rotateY(180deg);
+  transition: transform 0.6s;
 }
 
-.front,
-.back {
+.card .front,
+.card .back {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
+  transform: rotateY(180deg);
 }
 
-.back {
+.card .back {
+  transform: rotateY(0deg);
+}
+
+.card.is-flipped {
   transform: rotateY(180deg);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  text-align: center;
-  background-color: #f7fafc;
-  border: 1px solid #cbd5e0;
 }
 </style>

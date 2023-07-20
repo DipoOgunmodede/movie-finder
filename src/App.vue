@@ -272,8 +272,6 @@ const computeGridStyles = () => {
         </div>
       </div>
     </transition>
-
-
     <button @click="compareActorsFilmographies(actorsForComparison)"
       class="p-4 my-4 border border-black dark:border-white bg-green-500 disabled:bg-red-700 disabled:cursor-not-allowed"
       :disabled="actorsForComparison.length < 2">Compare filmographies</button>
@@ -287,31 +285,36 @@ const computeGridStyles = () => {
     </h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
-      <li v-for="film in actorsCommonFilms" :key="film.id" class="group  aspect-[2/3]">
+      <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
         <div class="card w-full h-full" @click="flipCard($event)">
           <div class="card__inner">
             <div class="front">
               <img v-if="showImages" :src="generateImageLink(film.poster_path)"
-                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95">
+                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95 w-full">
             </div>
             <div class="back h-full w-full bg-cover overflow-hidden"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
-              <div class="p-4 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information">
-                <h2>{{ film.original_title }}</h2>
-                <p v-if="film.tagline">Tagline: {{ film.tagline }}</p>
-                <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
-                <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
-                <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
-                <!-- loop over all genres in film.genres -->
-                <p>
-                  {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
-                  <span v-for="(genre, index) in film.genres" :key="genre.id">
-                    {{ genre.name }}<span v-if="index < film.genres.length - 1">,
+              <div
+                class="p-8 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
+                <div>
+                  <h2 class="text-6xl mb-2">{{ film.original_title }}</h2>
+                  <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
+                </div>
+                <div>
+                  <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
+                  <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
+                  <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
+                  <!-- loop over all genres in film.genres -->
+                  <p>
+                    {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
+                    <span v-for="(genre, index) in film.genres" :key="genre.id">
+                      {{ genre.name }}<span v-if="index < film.genres.length - 1">,
+                      </span>
                     </span>
-                  </span>
-                </p>
-  
-                <p>Runtime: {{ film.runtime + ' minutes' }}</p>
+                  </p>
+
+                  <p>Runtime: {{ film.runtime + ' minutes' }}</p>
+                </div>
                 <p class="mt-4">Synopsis: {{ film.overview }}</p>
               </div>
             </div>
@@ -395,8 +398,7 @@ const computeGridStyles = () => {
   transition: transform 0.6s;
 }
 
-.card .front,
-.card .back {
+.card :is(.front, .back) {
   position: absolute;
   top: 0;
   left: 0;

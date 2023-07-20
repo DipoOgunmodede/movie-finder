@@ -28,6 +28,14 @@ const addActor = () => {
   }
 }
 
+const flipCard = (event) => {
+  console.log('card flipped')
+  console.log(event)
+  // find parent card element
+  const cardInner = event.target.closest('.card__inner');
+  cardInner.classList.toggle('flipped');
+}
+
 const undoActor = () => {
   currentActor.value = actorsForComparison.value[actorsForComparison.value.length - 1]
   actorsForComparison.value.pop();
@@ -93,7 +101,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     actorPictures.value = [];
     const uniqueActors = new Set(actorsForComparison);
     if (uniqueActors.size !== actorsForComparison.length) {
-      alert('Duplicate actors(s) entered.');
+      alert('Duplicate actor(s) entered.');
       isLoading.value = false;
       return;
     }
@@ -118,7 +126,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     // get common films with all actors
     const commonFilms = await Promise.all(Array.from(commonFilmIds).map(async commonFilmId => {
       const response = await axios.get(`https://api.themoviedb.org/3/movie/${commonFilmId}`, { ...queryParams, append_to_response: 'external_ids' });
-      const { id, title, release_date, poster_path, imdb_id } = response.data;
+      const filmData = response.data;
 
       // get character names for every actor in the film
       const characterNames = actorFilmographies.map(actorFilms => {
@@ -126,7 +134,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
         return movie ? movie.character : '';
       });
 
-      return { id, title, release_date, poster_path, imdb_id, characterNames };
+      return filmData;
     }));
 
     // remove duplicate films
@@ -163,6 +171,20 @@ const actorsComparisonText = () => {
     : this.actorsForComparison[0];
   const filmsText = this.actorsCommonFilms.length > 1 ? 'films' : 'film';
   return `${actorsList} have been in the following ${this.actorsCommonFilms.length} ${filmsText}:`;
+}
+
+//format large numbers to dollars without decimal places
+const formatUSD = (number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(number)
+}
+
+const transformToLocaleDateString = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
 }
 
 //save showimages, actors for comparison and loadingOffset values to localStorage
@@ -265,23 +287,42 @@ const computeGridStyles = () => {
     </h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
-      <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
-        <div class="card">
-          <div class="front">
-            <!-- <a :href="`https://www.imdb.com/title/${film.imdb_id}`"> -->
-            <img v-if="showImages" :src=generateImageLink(film.poster_path) :alt="`Movie title: ${film.original_title}`"
-              class="md:group-hover:scale-95">
-            <!-- </a> -->
+      <li v-for="film in actorsCommonFilms" :key="film.id" class="group  aspect-[2/3]">
+        <div class="card w-full h-full" @click="flipCard($event)">
+          <div class="card__inner">
+            <div class="front">
+              <img v-if="showImages" :src="generateImageLink(film.poster_path)"
+                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95">
+            </div>
+            <div class="back h-full w-full bg-cover overflow-hidden"
+              :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
+              <div class="p-4 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information">
+                <h2>{{ film.original_title }}</h2>
+                <p v-if="film.tagline">Tagline: {{ film.tagline }}</p>
+                <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
+                <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
+                <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
+                <!-- loop over all genres in film.genres -->
+                <p>
+                  {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
+                  <span v-for="(genre, index) in film.genres" :key="genre.id">
+                    {{ genre.name }}<span v-if="index < film.genres.length - 1">,
+                    </span>
+                  </span>
+                </p>
+  
+                <p>Runtime: {{ film.runtime + ' minutes' }}</p>
+                <p class="mt-4">Synopsis: {{ film.overview }}</p>
+              </div>
+            </div>
           </div>
-          <div class="back">
-            <a :href="`https://www.imdb.com/title/${film.imdb_id}`">
-              <h2>{{ film.original_title }}</h2>
-              <p>{{ film.overview }}</p>
-            </a>
-          </div>
+
         </div>
       </li>
     </ul>
+
+
+
     <h2 class="text-4xl underline"></h2>
     <div class="border border-black dark:border-white p-4 my-4">
       <details>
@@ -349,34 +390,27 @@ const computeGridStyles = () => {
 
 <style>
 .card {
-  position: relative;
-  perspective: 1000px;
-  transition: transform 0.8s;
-}
-
-.card:hover {
+  transform-style: preserve-3d;
   transform: rotateY(180deg);
+  transition: transform 0.6s;
 }
 
-.front,
-.back {
+.card .front,
+.card .back {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
+  transform: rotateY(180deg);
 }
 
-.back {
+.card .back {
+  transform: rotateY(0deg);
+}
+
+.card.is-flipped {
   transform: rotateY(180deg);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  text-align: center;
-  background-color: #f7fafc;
-  border: 1px solid #cbd5e0;
 }
 </style>

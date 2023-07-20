@@ -1,34 +1,41 @@
-.text-code, code{
-    background-color: #eee;
-    color:black;
-    border-radius: 3px;
-    font-family: courier, monospace;
-    padding: 0 3px;
-
+.text-code,
+code {
+  background-color: #eee;
+  color: black;
+  border-radius: 3px;
+  font-family: courier, monospace;
+  padding: 0 3px;
 }
 
 .card-container {
-    perspective: 1000px;
-  }
-  .card {
-    width: 150px;
-    height: 225px;
-    transition: transform 0.5s;
-    transform-style: preserve-3d;
-  }
-  .card.flipped {
-    transform: rotateY(180deg);
-  }
-  .card .front,
-  .card .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-  }
-  .card .front {
-    z-index: 2;
-  }
-  .card .back {
-    transform: rotateY(180deg);
-  }
+  perspective: 1000px;
+}
+.card {
+  width: 150px;
+  height: 225px;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+.card__inner.flipped {
+  transform: rotateY(180deg);
+}
+.card .front,
+.card .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+.card .front {
+  z-index: 2;
+}
+

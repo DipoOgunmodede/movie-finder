@@ -378,7 +378,7 @@ const computeGridStyles = () => {
               the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
               <code>$actor2</code>
               haven't appeared in a film together on load</span> implemented 13/4/23</li>
-          <li>Increase max limit of actors to compare, as well as other types of roles (Director and actor collabs)
+          <li><span class="line-through">Increase max limit of actors to compare,</span> as well as other types of roles (Director and actor collabs)
           </li>
           <li><span class="line-through">show loading screen for longer before showing results</span> implemented
             13/4/23</li>

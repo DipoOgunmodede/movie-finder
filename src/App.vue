@@ -30,8 +30,10 @@ const addActor = () => {
 
 const flipCard = (event) => {
   console.log('card flipped')
-  const card = event.currentTarget.querySelector('.card');
-  card.classList.toggle('is-flipped');
+  console.log(event)
+  // find parent card element
+  const cardInner = event.target.closest('.card__inner');
+  cardInner.classList.toggle('flipped');
 }
 
 const undoActor = () => {
@@ -99,7 +101,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     actorPictures.value = [];
     const uniqueActors = new Set(actorsForComparison);
     if (uniqueActors.size !== actorsForComparison.length) {
-      alert('Duplicate actors(s) entered.');
+      alert('Duplicate actor(s) entered.');
       isLoading.value = false;
       return;
     }
@@ -124,7 +126,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     // get common films with all actors
     const commonFilms = await Promise.all(Array.from(commonFilmIds).map(async commonFilmId => {
       const response = await axios.get(`https://api.themoviedb.org/3/movie/${commonFilmId}`, { ...queryParams, append_to_response: 'external_ids' });
-      const { id, title, release_date, poster_path, imdb_id } = response.data;
+      const filmData = response.data;
 
       // get character names for every actor in the film
       const characterNames = actorFilmographies.map(actorFilms => {
@@ -132,7 +134,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
         return movie ? movie.character : '';
       });
 
-      return { id, title, release_date, poster_path, imdb_id, characterNames };
+      return filmData;
     }));
 
     // remove duplicate films
@@ -169,6 +171,20 @@ const actorsComparisonText = () => {
     : this.actorsForComparison[0];
   const filmsText = this.actorsCommonFilms.length > 1 ? 'films' : 'film';
   return `${actorsList} have been in the following ${this.actorsCommonFilms.length} ${filmsText}:`;
+}
+
+//format large numbers to dollars without decimal places
+const formatUSD = (number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(number)
+}
+
+const transformToLocaleDateString = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
 }
 
 //save showimages, actors for comparison and loadingOffset values to localStorage
@@ -271,16 +287,36 @@ const computeGridStyles = () => {
     </h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
-      <li v-for="film in actorsCommonFilms" :key="film.id" class="group">
-        <div class="card" @click="flipCard($event)">
-          <div class="front">
-            <img v-if="showImages" :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
-              class="md:group-hover:scale-95">
+      <li v-for="film in actorsCommonFilms" :key="film.id" class="group  aspect-[2/3]">
+        <div class="card w-full h-full" @click="flipCard($event)">
+          <div class="card__inner">
+            <div class="front">
+              <img v-if="showImages" :src="generateImageLink(film.poster_path)"
+                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95">
+            </div>
+            <div class="back h-full w-full bg-cover overflow-hidden"
+              :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
+              <div class="p-4 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information">
+                <h2>{{ film.original_title }}</h2>
+                <p v-if="film.tagline">Tagline: {{ film.tagline }}</p>
+                <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
+                <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
+                <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
+                <!-- loop over all genres in film.genres -->
+                <p>
+                  {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
+                  <span v-for="(genre, index) in film.genres" :key="genre.id">
+                    {{ genre.name }}<span v-if="index < film.genres.length - 1">,
+                    </span>
+                  </span>
+                </p>
+  
+                <p>Runtime: {{ film.runtime + ' minutes' }}</p>
+                <p class="mt-4">Synopsis: {{ film.overview }}</p>
+              </div>
+            </div>
           </div>
-          <div class="back">
-            <h2>{{ film.original_title }}</h2>
-            <p>{{ film.overview }}</p>
-          </div>
+
         </div>
       </li>
     </ul>

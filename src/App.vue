@@ -182,6 +182,11 @@ const formatUSD = (number) => {
   }).format(number)
 }
 
+const transformNamesToTitleCase = (name) => {
+  return name.split(' ').map(word => word[0].toUpperCase() + word.slice(1)).join(' ')
+}
+
+
 const transformToLocaleDateString = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString();
@@ -246,9 +251,9 @@ const computeGridStyles = () => {
           :class="currentActor.length < 2 ? 'opacity-50 bg-red-700 cursor-not-allowed' : 'bg-green-500'">Add
           actor</button>
       </section>
-      <ul v-if="actorsForComparison.length > 0">Actors being searched:
-        <li v-for="actor in actorsForComparison" class="list-disc list-inside"><span>{{ actor }} </span> <button
-            @click="removeActor(actor)">- Remove this actor</button>
+      <ul class="space-y-2 text-xl" v-if="actorsForComparison.length > 0">Actors being searched:
+        <li v-for="actor in actorsForComparison" class="list-disc list-inside text-base space-x-1"><span>{{ transformNamesToTitleCase(actor) }} </span> <button class="text-red-700"
+            @click="removeActor(actor)"> Remove this actor</button>
         </li>
       </ul>
       <details id="settings">
@@ -278,6 +283,7 @@ const computeGridStyles = () => {
 
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
+      <!-- this is such a fucking mess, refactor this into computed properties "at some point" -->
       {{ actorsForComparison.length > 1 ? actorsForComparison.slice(0, -1).join(', ') + ' and ' +
         actorsForComparison.slice(-1) : actorsForComparison[0] }}
       have been in the following {{ actorsCommonFilms.length }} {{
@@ -295,7 +301,7 @@ const computeGridStyles = () => {
             <div class="back h-full w-full bg-cover overflow-hidden"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-8 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
+                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
                 <div>
                   <h2 class="text-6xl mb-2">{{ film.original_title }}</h2>
                   <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>

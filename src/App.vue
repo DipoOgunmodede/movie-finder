@@ -32,7 +32,9 @@ const flipCard = (event) => {
   console.log('card flipped')
   console.log(event)
   // find parent card element
+  const card = event.target.closest('.card');
   const cardInner = event.target.closest('.card__inner');
+  card.classList.toggle('inner-is-flipped');
   cardInner.classList.toggle('flipped');
 }
 
@@ -298,10 +300,10 @@ const computeGridStyles = () => {
               <img v-if="showImages" :src="generateImageLink(film.poster_path)"
                 :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95 w-full">
             </div>
-            <div class="back h-full w-full bg-cover overflow-hidden"
+            <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
+                class="p-6 w-full h-full bg-[#330000] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
                 <div>
                   <h2 class="text-6xl mb-2">{{ film.original_title }}</h2>
                   <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
@@ -354,7 +356,7 @@ const computeGridStyles = () => {
       <details>
         <summary>Future improvements:</summary>
         <ul class="list-disc list-inside">
-          <li>Overhaul design completely</li>
+          <li>Overhaul design completely. It looks even worse on desktop</li>
           <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
           <li>Carousel display</li>
           <li>Properly obfuscate API key</li>
@@ -396,11 +398,3 @@ const computeGridStyles = () => {
   <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
   <a href="https://www.flaticon.com/free-icons/film" title="film icons">Film icons created by bukeicon - Flaticon</a>
 </template>
-
-<style>
-
-
-.card.inner-is-flipped {
-  @apply fixed inset-0 w-full h-full;
-}
-</style>

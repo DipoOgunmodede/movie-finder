@@ -398,27 +398,9 @@ const computeGridStyles = () => {
 </template>
 
 <style>
-.card {
-  transform-style: preserve-3d;
-  transform: rotateY(180deg);
-  transition: transform 0.6s;
-}
 
-.card :is(.front, .back) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  transform: rotateY(180deg);
-}
 
-.card .back {
-  transform: rotateY(0deg);
-}
-
-.card.is-flipped {
-  transform: rotateY(180deg);
+.card.inner-is-flipped {
+  @apply fixed inset-0 w-full h-full;
 }
 </style>

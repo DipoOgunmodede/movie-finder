@@ -29,14 +29,34 @@ const addActor = () => {
 }
 
 const flipCard = (event) => {
-  console.log('card flipped')
-  console.log(event)
+  console.log('card flipped');
+  console.log(event);
   // find parent card element
   const card = event.target.closest('.card');
   const cardInner = event.target.closest('.card__inner');
+  
+  // Remove inner-is-flipped class from all other cards
+  const allCards = document.querySelectorAll('.card');
+  allCards.forEach((otherCard) => {
+    if (otherCard !== card) {
+      otherCard.classList.remove('inner-is-flipped');
+      otherCard.querySelector('.card__inner').classList.remove('flipped');
+    }
+  });
+
   card.classList.toggle('inner-is-flipped');
+  //remove scrolling from body
+  document.body.classList.toggle('overflow-hidden');
+  
   cardInner.classList.toggle('flipped');
-}
+};
+
+// Call flipCard when a card is clicked
+const cards = document.querySelectorAll('.card');
+cards.forEach((card) => {
+  card.addEventListener('click', flipCard);
+});
+
 
 const undoActor = () => {
   currentActor.value = actorsForComparison.value[actorsForComparison.value.length - 1]
@@ -295,8 +315,8 @@ const computeGridStyles = () => {
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
         <div class="card w-full h-full" @click="flipCard($event)">
-          <div class="card__inner">
-            <div class="front">
+          <div class="card__inner w-full h-full md:transition-transform md:duration-300">
+            <div class="front z-[2]">
               <img v-if="showImages" :src="generateImageLink(film.poster_path)"
                 :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95 w-full">
             </div>

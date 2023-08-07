@@ -334,7 +334,7 @@ const computeGridStyles = () => {
 
                   <p>Runtime: {{ film.runtime + ' minutes' }}</p>
                 </div>
-                <p class="mt-4 line-clamp-[16] md:line-clamp-[9]">Synopsis: {{ film.overview }}</p>
+                <p class="mt-4 line-clamp-[16] md:line-clamp-[8]">Synopsis: {{ film.overview }}</p>
               </div>
             </div>
           </div>

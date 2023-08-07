@@ -184,16 +184,6 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     // handle error by displaying an error message to the user
   }
 };
-const actorsComparisonText = () => {
-  if (this.actorsForComparison.length === 0) {
-    return '';
-  }
-  const actorsList = this.actorsForComparison.length > 1
-    ? `${this.actorsForComparison.slice(0, -1).join(', ')} and ${this.actorsForComparison.slice(-1)}`
-    : this.actorsForComparison[0];
-  const filmsText = this.actorsCommonFilms.length > 1 ? 'films' : 'film';
-  return `${actorsList} have been in the following ${this.actorsCommonFilms.length} ${filmsText}:`;
-}
 
 //format large numbers to dollars without decimal places
 const formatUSD = (number) => {
@@ -292,7 +282,7 @@ const computeGridStyles = () => {
       <div
         class="loading-overlay overflow-hidden p-4 fixed inset-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-items-center z-10">
         <p v-if="actorsForComparison.length > 0">Looking up filmographies for the following:</p>
-        <p>{{ actorsForComparison.join(', ') }}</p>
+        <p>{{ transformNamesToTitleCase(actorsForComparison.join(', ')) }}</p>
         <div class="flex flex-wrap justify-around gap-4">
           <img v-for="actor in actorPictures" :src="actor"
             class="w-32 aspect-square rounded-full object-cover animate-spin" />
@@ -305,12 +295,16 @@ const computeGridStyles = () => {
 
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
-      <!-- this is such a fucking mess, refactor this into computed properties "at some point" -->
-      {{ actorsForComparison.length > 1 ? actorsForComparison.slice(0, -1).join(', ') + ' and ' +
-        actorsForComparison.slice(-1) : actorsForComparison[0] }}
-      have been in the following {{ actorsCommonFilms.length }} {{
-        actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
-    </h2>
+  {{
+    actorsForComparison.length > 1
+      ? actorsForComparison.slice(0, -1).map(actor => transformNamesToTitleCase(actor)).join(', ') +
+        ' and ' +
+        transformNamesToTitleCase(actorsForComparison.slice(-1)[0])
+      : transformNamesToTitleCase(actorsForComparison[0])
+  }}
+  have been in the following {{ actorsCommonFilms.length }} {{
+    actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
+</h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
@@ -323,17 +317,17 @@ const computeGridStyles = () => {
             <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-6 w-full h-full bg-[#330000] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
+                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 ">
                 <div>
-                  <h2 class="text-6xl mb-2">{{ film.original_title }}</h2>
+                  <h2 class="text-6xl md:text-3xl mb-2">{{ film.original_title }}</h2>
                   <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
                 </div>
-                <div>
+                <div class="">
                   <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
                   <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
                   <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
                   <!-- loop over all genres in film.genres -->
-                  <p>
+                  <p class="line-clamp-1">
                     {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
                     <span v-for="(genre, index) in film.genres" :key="genre.id">
                       {{ genre.name }}<span v-if="index < film.genres.length - 1">,
@@ -343,7 +337,7 @@ const computeGridStyles = () => {
 
                   <p>Runtime: {{ film.runtime + ' minutes' }}</p>
                 </div>
-                <p class="mt-4">Synopsis: {{ film.overview }}</p>
+                <p class="mt-4 line-clamp-[16] md:line-clamp-[9]">Synopsis: {{ film.overview }}</p>
               </div>
             </div>
           </div>
@@ -416,5 +410,4 @@ const computeGridStyles = () => {
     </div>
   </div>
   <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
-  <a href="https://www.flaticon.com/free-icons/film" title="film icons">Film icons created by bukeicon - Flaticon</a>
 </template>

@@ -270,11 +270,8 @@ const computeGridStyles = () => {
       </ul>
       <details id="settings">
         <summary>Visual settings</summary>
-        <label class="text-xl flex">Toggle images? {{ showImages }}
-          <input type="checkbox" v-model="showImages" class="ml-4 scale-150" />
-        </label>
         <label class="text-xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
-          <input type="range" v-model="loadingOffset" min="0" max="3000" step="50" class="w-full md:w-1/2" />
+          <input type="range" v-model="loadingOffset" min="0" max="10000" step="50" class="w-full md:w-1/2" />
         </label>
       </details>
     </div>
@@ -285,7 +282,7 @@ const computeGridStyles = () => {
         <p>{{ transformNamesToTitleCase(actorsForComparison.join(', ')) }}</p>
         <div class="flex flex-wrap justify-around gap-4">
           <img v-for="actor in actorPictures" :src="actor"
-            class="w-32 aspect-square rounded-full object-cover animate-spin" />
+            class="w-32 aspect-square rounded-full object-cover animate-spin-fast duration-100" />
         </div>
       </div>
     </transition>
@@ -311,7 +308,7 @@ const computeGridStyles = () => {
         <div class="card w-full h-full" @click="flipCard($event)">
           <div class="card__inner w-full h-full md:transition-transform md:duration-300">
             <div class="front z-[2]">
-              <img v-if="showImages" :src="generateImageLink(film.poster_path)"
+              <img :src="generateImageLink(film.poster_path)"
                 :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95 w-full">
             </div>
             <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"

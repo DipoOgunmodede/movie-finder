@@ -5,7 +5,10 @@ module.exports = {
     "./src/**/*.{vue,js}"
   ],
   theme: {
-    extend: {},
-  },
+    extend: {
+      animation: {
+        'spin-fast': 'spin 1s cubic-bezier(.71,-0.52,.28,1.41) infinite',
+      }
+  }},
   plugins: [],
 }

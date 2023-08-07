@@ -243,7 +243,7 @@ onMounted(() => {
 const computeGridStyles = () => {
   //if images are shown, add responsive grid classes
   if (showImages.value) {
-    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-end gap-8"
+    return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 items-end gap-8"
   } else {
     return ""
   }
@@ -316,7 +316,7 @@ const computeGridStyles = () => {
               <div
                 class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 ">
                 <div>
-                  <h2 class="text-6xl md:text-3xl mb-2">{{ film.original_title }}</h2>
+                  <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
                   <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
                 </div>
                 <div class="">
@@ -334,7 +334,7 @@ const computeGridStyles = () => {
 
                   <p>Runtime: {{ film.runtime + ' minutes' }}</p>
                 </div>
-                <p class="mt-4 line-clamp-[16] md:line-clamp-[8]">Synopsis: {{ film.overview }}</p>
+                <p class="mt-4 line-clamp-[16] md:hidden 2xl:inline 2xl:line-clamp-[8]">Synopsis: {{ film.overview }}</p>
               </div>
             </div>
           </div>

@@ -366,6 +366,9 @@ const computeGridStyles = () => {
 
       <details>
         <summary>Future improvements:</summary>
+        <li>Add save search functionality</li>
+        <li>View cast button</li>
+        <li>Add actor button to cast list</li>
         <ul class="list-disc list-inside">
           <li>Overhaul design completely. It looks even worse on desktop</li>
           <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>

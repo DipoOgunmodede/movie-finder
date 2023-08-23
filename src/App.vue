@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
+import Heading from './components/Heading.vue';
 const currentActor = ref('')
 const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
@@ -34,7 +35,7 @@ const flipCard = (event) => {
   // find parent card element
   const card = event.target.closest('.card');
   const cardInner = event.target.closest('.card__inner');
-  
+
   // Remove inner-is-flipped class from all other cards
   const allCards = document.querySelectorAll('.card');
   allCards.forEach((otherCard) => {
@@ -47,7 +48,7 @@ const flipCard = (event) => {
   card.classList.toggle('inner-is-flipped');
   //remove scrolling from body
   document.body.classList.toggle('overflow-hidden');
-  
+
   cardInner.classList.toggle('flipped');
 };
 
@@ -252,7 +253,7 @@ const computeGridStyles = () => {
 
 <template>
   <div class="flex flex-col justify-center dark:text-white p-4">
-    <p>This is an extremely basic prototype for an app that tells you which films actors have been in together.</p>
+    <Heading />
     <div class="flex flex-col justify-center gap-4">
       <section class="flex gap-4 my-4 ">
         <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2 w-2/3"
@@ -264,8 +265,9 @@ const computeGridStyles = () => {
           actor</button>
       </section>
       <ul class="space-y-2 text-xl" v-if="actorsForComparison.length > 0">Actors being searched:
-        <li v-for="actor in actorsForComparison" class="list-disc list-inside text-base space-x-1"><span>{{ transformNamesToTitleCase(actor) }} </span> <button class="text-red-700"
-            @click="removeActor(actor)"> Remove this actor</button>
+        <li v-for="actor in actorsForComparison" class="list-disc list-inside text-base space-x-1"><span>{{
+          transformNamesToTitleCase(actor) }} </span> <button class="text-red-700" @click="removeActor(actor)"> Remove
+            this actor</button>
         </li>
       </ul>
       <details id="settings">
@@ -292,24 +294,24 @@ const computeGridStyles = () => {
 
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
-  {{
-    actorsForComparison.length > 1
-      ? actorsForComparison.slice(0, -1).map(actor => transformNamesToTitleCase(actor)).join(', ') +
+      {{
+        actorsForComparison.length > 1
+        ? actorsForComparison.slice(0, -1).map(actor => transformNamesToTitleCase(actor)).join(', ') +
         ' and ' +
         transformNamesToTitleCase(actorsForComparison.slice(-1)[0])
-      : transformNamesToTitleCase(actorsForComparison[0])
-  }}
-  have been in the following {{ actorsCommonFilms.length }} {{
-    actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
-</h2>
+        : transformNamesToTitleCase(actorsForComparison[0])
+      }}
+      have been in the following {{ actorsCommonFilms.length }} {{
+        actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
+    </h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
         <div class="card w-full h-full" @click="flipCard($event)">
           <div class="card__inner w-full h-full md:transition-transform md:duration-300">
             <div class="front z-[2]">
-              <img :src="generateImageLink(film.poster_path)"
-                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95 w-full">
+              <img :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
+                class="md:group-hover:scale-95 w-full">
             </div>
             <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
@@ -397,7 +399,8 @@ const computeGridStyles = () => {
               the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
               <code>$actor2</code>
               haven't appeared in a film together on load</span> implemented 13/4/23</li>
-          <li><span class="line-through">Increase max limit of actors to compare,</span> as well as other types of roles (Director and actor collabs)
+          <li><span class="line-through">Increase max limit of actors to compare,</span> as well as other types of roles
+            (Director and actor collabs)
           </li>
           <li><span class="line-through">show loading screen for longer before showing results</span> implemented
             13/4/23</li>
@@ -406,5 +409,4 @@ const computeGridStyles = () => {
       </details>
     </div>
   </div>
-  <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
-</template>
+  <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small></template>

@@ -11,11 +11,13 @@ const actorPictures = ref([])
 const showImages = ref(true)
 const isLoading = ref(false)
 const loadingOffsetValue = ref(0) // Store the loadingOffsetValue dynamically
+
+//functions that interact with child components
 const updateLoadingOffsetValue = (newValue) => {
   loadingOffsetValue.value = newValue
 }
 
-//const default settings is true when loading offset isn't 0 and/or show images is false
+//functions related to querying the API
 const queryParams = {
   params: {
     api_key: "c92bac37a196e6559bcb667ecb49b1e1",
@@ -63,7 +65,7 @@ cards.forEach((card) => {
   card.addEventListener('click', flipCard);
 });
 
-
+//functions related to the input form
 const undoActor = () => {
   currentActor.value = actorsForComparison.value[actorsForComparison.value.length - 1]
   actorsForComparison.value.pop();
@@ -117,12 +119,14 @@ const getActorFilmography = async (actorName) => {
 
 const compareActorsFilmographies = async (actorsForComparison) => {
   try {
-    // show loading spinner
-    // isLoading.value = true;
+    // Show loading spinner after a delay based on loadingOffset
+    isLoading.value = true;
     actorPictures.value = [];
     const uniqueActors = new Set(actorsForComparison);
+    //check for duplicates first
     if (uniqueActors.size !== actorsForComparison.length) {
       alert('Duplicate actor(s) entered.');
+      // set loading to false
       isLoading.value = false;
       return;
     }
@@ -141,8 +145,6 @@ const compareActorsFilmographies = async (actorsForComparison) => {
         }
       });
     }
-
-
 
     // get common films with all actors
     const commonFilms = await Promise.all(Array.from(commonFilmIds).map(async commonFilmId => {
@@ -170,6 +172,10 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     // update state variables
     actorsCommonFilms.value = uniqueCommonFilms;
     console.log(actorsCommonFilms.value)
+
+    setTimeout(() => {
+      isLoading.value = false;
+    }, loadingOffsetValue.value);
 
   } catch (error) {
     console.error(error);

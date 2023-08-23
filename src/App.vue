@@ -10,8 +10,10 @@ const actorsCommonFilms = ref({})
 const actorPictures = ref([])
 const showImages = ref(true)
 const isLoading = ref(false)
-const loadingOffset = ref(0)
-
+const loadingOffsetValue = ref(0) // Store the loadingOffsetValue dynamically
+const updateLoadingOffsetValue = (newValue) => {
+  loadingOffsetValue.value = newValue
+}
 
 //const default settings is true when loading offset isn't 0 and/or show images is false
 const queryParams = {
@@ -67,13 +69,6 @@ const undoActor = () => {
   actorsForComparison.value.pop();
 }
 
-const openSettingsCheck = () => {
-  //if localstorage values are anything other than the default values, open the details element
-  if (loadingOffset.value !== 0 || showImages.value === false) {
-    document.getElementById('settings').open = true
-  }
-}
-
 //add a method to remove an actor from the array on element click, but keeping the rest
 const removeActor = (actorName) => {
   actorsForComparison.value = actorsForComparison.value.filter(actor => actor !== actorName)
@@ -123,7 +118,7 @@ const getActorFilmography = async (actorName) => {
 const compareActorsFilmographies = async (actorsForComparison) => {
   try {
     // show loading spinner
-    isLoading.value = true;
+    // isLoading.value = true;
     actorPictures.value = [];
     const uniqueActors = new Set(actorsForComparison);
     if (uniqueActors.size !== actorsForComparison.length) {
@@ -175,14 +170,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
     // update state variables
     actorsCommonFilms.value = uniqueCommonFilms;
     console.log(actorsCommonFilms.value)
-    //if loading offset is more than 0 add a set timeout to allow the loading animation to finish
-    if (loadingOffset.value > 0) {
-      setTimeout(() => {
-        isLoading.value = false;
-      }, loadingOffset.value)
-    } else {
-      isLoading.value = false;
-    }
+
   } catch (error) {
     console.error(error);
     // handle error by displaying an error message to the user
@@ -208,23 +196,18 @@ const transformToLocaleDateString = (dateString) => {
   return date.toLocaleDateString();
 }
 
-//save showimages, actors for comparison and loadingOffset values to localStorage
+//save showimages, actors for comparison values to localStorage
 const saveLocalStorage = () => {
-  // localStorage.setItem('loadingOffset', loadingOffset.value)
+
   localStorage.setItem('showImages', showImages.value)
   localStorage.setItem('actorsForComparison', JSON.stringify(actorsForComparison.value))
 }
 
 const checkLocalStorage = () => {
   // check if localStorage items exist
-  const loadingOffsetLocalStorage = localStorage.getItem('loadingOffset')
   const showImagesLocalStorage = localStorage.getItem('showImages')
   const actorsForComparisonLocalStorage = localStorage.getItem('actorsForComparison')
 
-  // if localStorage items exist, update the variables with their values
-  if (loadingOffsetLocalStorage) {
-    loadingOffset.value = Number(loadingOffsetLocalStorage)
-  }
   if (showImagesLocalStorage) {
     showImages.value = showImagesLocalStorage === 'true'
   }
@@ -233,8 +216,8 @@ const checkLocalStorage = () => {
   }
 }
 
-//update local storage settings every time loadingoffset, showimages or actorsforcomparison changes
-watch([loadingOffset, showImages, actorsForComparison], () => {
+//update local storage settings every time  showimages or actorsforcomparison changes
+watch([showImages, actorsForComparison], () => {
   saveLocalStorage()
 })
 
@@ -243,7 +226,6 @@ watch([loadingOffset, showImages, actorsForComparison], () => {
 onMounted(() => {
   //check if cookies exist
   checkLocalStorage()
-  openSettingsCheck()
 })
 
 const computeGridStyles = () => {
@@ -275,7 +257,7 @@ const computeGridStyles = () => {
             this actor</button>
         </li>
       </ul>
-      <Settings/>
+      <settings :loadingOffsetValue="loadingOffsetValue" @update:loadingOffsetValue="updateLoadingOffsetValue" />
     </div>
     <transition name="fade" v-if="isLoading">
       <div
@@ -409,4 +391,5 @@ const computeGridStyles = () => {
       </details>
     </div>
   </div>
-  <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small></template>
+  <small class="text-black dark:text-white">Images provided by <a href="https://www.themoviedb.org/">TMDB</a></small>
+</template>

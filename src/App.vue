@@ -3,6 +3,7 @@ import axios from 'axios'
 import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
 import Heading from './components/Heading.vue';
+import Settings from './components/Settings.vue';
 const currentActor = ref('')
 const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
@@ -10,6 +11,8 @@ const actorPictures = ref([])
 const showImages = ref(true)
 const isLoading = ref(false)
 const loadingOffset = ref(0)
+
+
 //const default settings is true when loading offset isn't 0 and/or show images is false
 const queryParams = {
   params: {
@@ -207,7 +210,7 @@ const transformToLocaleDateString = (dateString) => {
 
 //save showimages, actors for comparison and loadingOffset values to localStorage
 const saveLocalStorage = () => {
-  localStorage.setItem('loadingOffset', loadingOffset.value)
+  // localStorage.setItem('loadingOffset', loadingOffset.value)
   localStorage.setItem('showImages', showImages.value)
   localStorage.setItem('actorsForComparison', JSON.stringify(actorsForComparison.value))
 }
@@ -234,6 +237,8 @@ const checkLocalStorage = () => {
 watch([loadingOffset, showImages, actorsForComparison], () => {
   saveLocalStorage()
 })
+
+//reusable watch function where you pass in the value to watch, the function to run and the function to run on load as params
 
 onMounted(() => {
   //check if cookies exist
@@ -270,12 +275,7 @@ const computeGridStyles = () => {
             this actor</button>
         </li>
       </ul>
-      <details id="settings">
-        <summary>Visual settings</summary>
-        <label class="text-xl flex flex-col">Show loading screen for {{ loadingOffset }} additional milliseconds
-          <input type="range" v-model="loadingOffset" min="0" max="10000" step="50" class="w-full md:w-1/2" />
-        </label>
-      </details>
+      <Settings/>
     </div>
     <transition name="fade" v-if="isLoading">
       <div

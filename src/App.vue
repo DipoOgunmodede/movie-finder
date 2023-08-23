@@ -223,9 +223,7 @@ const checkLocalStorage = () => {
 }
 
 //update local storage settings every time  showimages or actorsforcomparison changes
-watch([showImages, actorsForComparison], () => {
-  saveLocalStorage()
-})
+watch([showImages, actorsForComparison], saveLocalStorage);
 
 //reusable watch function where you pass in the value to watch, the function to run and the function to run on load as params
 
@@ -393,6 +391,7 @@ const computeGridStyles = () => {
           <li><span class="line-through">show loading screen for longer before showing results</span> implemented
             13/4/23</li>
           <li>Implement vue draggable to drag actors into a "bucket" for comparison - vue sortable</li>
+          <li>Use event delegation to improve card flip</li>
         </ul>
       </details>
     </div>

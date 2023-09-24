@@ -6,6 +6,7 @@ const currentActor = ref('')
 const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
+const showingCast = ref(false)
 const showImages = ref(true)
 const isLoading = ref(false)
 const loadingOffset = ref(0)
@@ -34,7 +35,7 @@ const flipCard = (event) => {
   // find parent card element
   const card = event.target.closest('.card');
   const cardInner = event.target.closest('.card__inner');
-  
+
   // Remove inner-is-flipped class from all other cards
   const allCards = document.querySelectorAll('.card');
   allCards.forEach((otherCard) => {
@@ -47,7 +48,7 @@ const flipCard = (event) => {
   card.classList.toggle('inner-is-flipped');
   //remove scrolling from body
   document.body.classList.toggle('overflow-hidden');
-  
+
   cardInner.classList.toggle('flipped');
 };
 
@@ -73,6 +74,10 @@ const openSettingsCheck = () => {
 //add a method to remove an actor from the array on element click, but keeping the rest
 const removeActor = (actorName) => {
   actorsForComparison.value = actorsForComparison.value.filter(actor => actor !== actorName)
+  //immediately run comparison if there are more than 1 actors in the array
+  if (actorsForComparison.value.length > 1) {
+    compareActorsFilmographies(actorsForComparison.value)
+  }
 }
 
 const getActorIdFromName = async (actorName) => {
@@ -185,6 +190,55 @@ const compareActorsFilmographies = async (actorsForComparison) => {
   }
 };
 
+const toggleCastVisibility = (filmId) => {
+  const film = actorsCommonFilms.value.find((film) => film.id === filmId);
+
+  if (!film.castList) {
+    // If cast list doesn't exist, fetch it from the API
+    axios
+      .get(`https://api.themoviedb.org/3/movie/${filmId}/credits`, queryParams)
+      .then((response) => {
+        const castList = response.data.cast.map((actor) => ({
+          actorName: actor.name,
+          characterName: actor.character,
+        }));
+        film.castList = castList;
+        console.log(castList)
+        showingCast.value = true;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } else {
+    // If cast list exists, simply toggle visibility
+    showingCast.value = !showingCast.value;
+  }
+};
+
+const resetAllCardsAndCastVisiblity = () => {
+  //remove card visibility and force card to show front
+  document.body.classList.remove('overflow-hidden');
+  const allCards = document.querySelectorAll('.card');
+  allCards.forEach((otherCard) => {
+    otherCard.classList.remove('inner-is-flipped');
+    otherCard.querySelector('.card__inner').classList.remove('flipped');
+  });
+  //hide cast
+  showingCast.value = false;
+
+}
+
+const addActorFromCast = (actorName) => {
+  const confirmation = confirm(`Do you want to add ${actorName} to the comparison array? (this will immediately run a new search)`);
+  if (confirmation) {
+    addActorName(actorName);
+    //reset all cards and cast visibility
+    resetAllCardsAndCastVisiblity();
+    //run comparison immediately
+    compareActorsFilmographies(actorsForComparison.value)
+  }
+};
+
 //format large numbers to dollars without decimal places
 const formatUSD = (number) => {
   return new Intl.NumberFormat('en-US', {
@@ -204,7 +258,7 @@ const transformToLocaleDateString = (dateString) => {
   return date.toLocaleDateString();
 }
 
-//save showimages, actors for comparison and loadingOffset values to localStorage
+//save showimages, actors for comparison values to localStorage
 const saveLocalStorage = () => {
   localStorage.setItem('loadingOffset', loadingOffset.value)
   localStorage.setItem('showImages', showImages.value)
@@ -264,8 +318,9 @@ const computeGridStyles = () => {
           actor</button>
       </section>
       <ul class="space-y-2 text-xl" v-if="actorsForComparison.length > 0">Actors being searched:
-        <li v-for="actor in actorsForComparison" class="list-disc list-inside text-base space-x-1"><span>{{ transformNamesToTitleCase(actor) }} </span> <button class="text-red-700"
-            @click="removeActor(actor)"> Remove this actor</button>
+        <li v-for="actor in actorsForComparison" class="list-disc list-inside text-base space-x-1"><span>{{
+          transformNamesToTitleCase(actor) }} </span> <button class="text-red-700" @click="removeActor(actor)"> Remove
+            this actor</button>
         </li>
       </ul>
       <details id="settings">
@@ -292,51 +347,75 @@ const computeGridStyles = () => {
 
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
-  {{
-    actorsForComparison.length > 1
-      ? actorsForComparison.slice(0, -1).map(actor => transformNamesToTitleCase(actor)).join(', ') +
+      {{
+        actorsForComparison.length > 1
+        ? actorsForComparison.slice(0, -1).map(actor => transformNamesToTitleCase(actor)).join(', ') +
         ' and ' +
         transformNamesToTitleCase(actorsForComparison.slice(-1)[0])
-      : transformNamesToTitleCase(actorsForComparison[0])
-  }}
-  have been in the following {{ actorsCommonFilms.length }} {{
-    actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
-</h2>
+        : transformNamesToTitleCase(actorsForComparison[0])
+      }}
+      have been in the following {{ actorsCommonFilms.length }} {{
+        actorsCommonFilms.length === 1 ? 'film' : 'films' }}:
+    </h2>
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
-        <div class="card w-full h-full" @click="flipCard($event)">
+        <div class="card w-full h-full" @click.once="flipCard($event)">
           <div class="card__inner w-full h-full md:transition-transform md:duration-300">
             <div class="front z-[2]">
-              <img :src="generateImageLink(film.poster_path)"
-                :alt="`Movie title: ${film.original_title}`" class="md:group-hover:scale-95 w-full">
+              <img :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
+                class="md:group-hover:scale-95 w-full">
             </div>
             <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 ">
-                <div>
-                  <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
-                  <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
-                </div>
-                <div class="">
-                  <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
-                  <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
-                  <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
-                  <!-- loop over all genres in film.genres -->
-                  <p class="line-clamp-1">
-                    {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
-                    <span v-for="(genre, index) in film.genres" :key="genre.id">
-                      {{ genre.name }}<span v-if="index < film.genres.length - 1">,
+                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
+                <button class="close-button" @click="resetAllCardsAndCastVisiblity">CLOSE CARD</button>
+                <div v-if="!showingCast">
+                  <div>
+                    <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
+                    <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
+                  </div>
+                  <div class="">
+                    <p>Released on {{ transformToLocaleDateString(film.release_date) }}</p>
+                    <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
+                    <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
+                    <!-- loop over all genres in film.genres -->
+                    <p class="line-clamp-1">
+                      {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
+                      <span v-for="(genre, index) in film.genres" :key="genre.id">
+                        {{ genre.name }}<span v-if="index < film.genres.length - 1">,
+                        </span>
                       </span>
-                    </span>
-                  </p>
+                    </p>
 
-                  <p>Runtime: {{ film.runtime + ' minutes' }}</p>
+                    <p>Runtime: {{ film.runtime + ' minutes' }}</p>
+                  </div>
+                  <p class="mt-4 line-clamp-[16] md:hidden 2xl:inline 2xl:line-clamp-[8]">Synopsis: {{ film.overview }}
+                  </p>
+                  <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
+                    SHOW CAST
+                  </button>
                 </div>
-                <p class="mt-4 line-clamp-[16] md:hidden 2xl:inline 2xl:line-clamp-[8]">Synopsis: {{ film.overview }}</p>
+                <div v-else>
+                  <h3 class="text-2xl mb-2">Cast List:</h3>
+                  <ul>
+                    <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
+                      SHOW SYNOPSIS
+                    </button>
+                    <li v-for="castItem in film.castList" :key="castItem.actorName" class="text-xl">
+                      <span class="cursor-pointer hover:underline" @click="addActorFromCast(castItem.actorName)">{{
+                        castItem.actorName }}</span> as {{ castItem.characterName }}
+                    </li>
+                  </ul>
+
+                </div>
+
+
               </div>
+
             </div>
+
           </div>
 
         </div>
@@ -366,6 +445,9 @@ const computeGridStyles = () => {
 
       <details>
         <summary>Future improvements:</summary>
+        <li>Add save search functionality</li>
+        <li>View cast button</li>
+        <li>Add actor button to cast list</li>
         <ul class="list-disc list-inside">
           <li>Overhaul design completely. It looks even worse on desktop</li>
           <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>
@@ -397,7 +479,8 @@ const computeGridStyles = () => {
               the previous change. Trying to do this now will incorrectly say <code>$actor1</code> and
               <code>$actor2</code>
               haven't appeared in a film together on load</span> implemented 13/4/23</li>
-          <li><span class="line-through">Increase max limit of actors to compare,</span> as well as other types of roles (Director and actor collabs)
+          <li><span class="line-through">Increase max limit of actors to compare,</span> as well as other types of roles
+            (Director and actor collabs)
           </li>
           <li><span class="line-through">show loading screen for longer before showing results</span> implemented
             13/4/23</li>

@@ -190,30 +190,34 @@ const compareActorsFilmographies = async (actorsForComparison) => {
   }
 };
 
+const getCast = (film) => {
+  axios
+    .get(`https://api.themoviedb.org/3/movie/${film.id}/credits`, queryParams)
+    .then((response) => {
+      const castList = response.data.cast.map((actor) => ({
+        actorName: actor.name,
+        characterName: actor.character,
+      }));
+      film.castList = castList;
+      console.log(castList);
+      showingCast.value = true;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
 const toggleCastVisibility = (filmId) => {
   const film = actorsCommonFilms.value.find((film) => film.id === filmId);
 
   if (!film.castList) {
-    // If cast list doesn't exist, fetch it from the API
-    axios
-      .get(`https://api.themoviedb.org/3/movie/${filmId}/credits`, queryParams)
-      .then((response) => {
-        const castList = response.data.cast.map((actor) => ({
-          actorName: actor.name,
-          characterName: actor.character,
-        }));
-        film.castList = castList;
-        console.log(castList)
-        showingCast.value = true;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    getCast(film);
   } else {
     // If cast list exists, simply toggle visibility
     showingCast.value = !showingCast.value;
   }
 };
+
 
 const resetAllCardsAndCastVisiblity = () => {
   //remove card visibility and force card to show front

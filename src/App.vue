@@ -6,6 +6,7 @@ const currentActor = ref('')
 const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
+const showingCast = ref(false)
 const showImages = ref(true)
 const isLoading = ref(false)
 const loadingOffset = ref(0)
@@ -185,6 +186,24 @@ const compareActorsFilmographies = async (actorsForComparison) => {
   }
 };
 
+const toggleCastVisibility = (filmId) => {
+  if (showingCast.value) {
+    // If cast is currently shown, hide it
+    showingCast.value = false;
+  } else {
+    // If cast is currently hidden, show it and update the content
+    axios.get(`https://api.themoviedb.org/3/movie/${filmId}/credits`, queryParams)
+      .then((response) => {
+        const castList = response.data.cast.map(actor => `${actor.name} as ${actor.character}`);
+        actorsCommonFilms.value.find(film => film.id === filmId).castList = castList;
+        showingCast.value = true;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
+
 //format large numbers to dollars without decimal places
 const formatUSD = (number) => {
   return new Intl.NumberFormat('en-US', {
@@ -203,8 +222,21 @@ const transformToLocaleDateString = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString();
 }
+const showCast = (filmID) => {
+  //get the cast of this film using the id and pass it into tmdb api call for cast
+  axios.get(`https://api.themoviedb.org/3/movie/${filmID}/credits`, queryParams)
+    .then((response) => {
+      console.log(response.data.cast)
+      //show the cast of this film in an alert inside the "back" of the card
+      alert(`The cast of this film is: ${response.data.cast.map(actor => actor.name).join(', ')}`)
 
-//save showimages, actors for comparison and loadingOffset values to localStorage
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+
+}
+//save showimages, actors for comparison values to localStorage
 const saveLocalStorage = () => {
   localStorage.setItem('loadingOffset', loadingOffset.value)
   localStorage.setItem('showImages', showImages.value)
@@ -314,7 +346,8 @@ const computeGridStyles = () => {
             <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 ">
+                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4"
+                v-if="!showingCast">
                 <div>
                   <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
                   <p v-if="film.tagline" class="text-xl mb">Tagline: {{ film.tagline }}</p>
@@ -335,8 +368,23 @@ const computeGridStyles = () => {
                   <p>Runtime: {{ film.runtime + ' minutes' }}</p>
                 </div>
                 <p class="mt-4 line-clamp-[16] md:hidden 2xl:inline 2xl:line-clamp-[8]">Synopsis: {{ film.overview }}</p>
+                <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
+                  {{ showingCast ? 'HIDE' : 'SHOW' }} CAST
+                </button>
+
+
+              </div>
+              <div v-else>
+                THIS IS WHERE THE CAST WILL GO
+                <ul>
+                  <li v-for="actor in film.cast" :key="actor.id" class="text-xl">
+                    {{ actor.name }} as {{ actor.character }}</li>
+                </ul>
+                <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
+                  {{ showingCast ? 'HIDE' : 'SHOW' }} SYNOPSIS</button>
               </div>
             </div>
+
           </div>
 
         </div>

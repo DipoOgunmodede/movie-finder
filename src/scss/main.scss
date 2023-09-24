@@ -15,7 +15,7 @@ code {
 }
 
 .card.inner-is-flipped{
-  @apply inset-0 fixed md:static z-10;
+  @apply inset-0 fixed z-10;
   transition-duration: 0.25s;
 }
 .card .front,

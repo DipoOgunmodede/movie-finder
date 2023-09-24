@@ -360,8 +360,8 @@ const computeGridStyles = () => {
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
-        <div class="card w-full h-full" @click.once="flipCard($event)">
-          <div class="card__inner w-full h-full md:transition-transform md:duration-300">
+        <div class="card w-full h-full" @click="flipCard($event)">
+          <div class="card__inner w-full h-full cardTransition">
             <div class="front z-[2]">
               <img :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
                 class="md:group-hover:scale-95 w-full">

@@ -182,8 +182,10 @@ const compareActorsFilmographies = async (actorsForComparison) => {
       setTimeout(() => {
         isLoading.value = false;
       }, loadingOffset.value)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       isLoading.value = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   } catch (error) {
     console.error(error);

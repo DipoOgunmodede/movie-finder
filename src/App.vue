@@ -10,6 +10,7 @@ const showingCast = ref(false)
 const showImages = ref(true)
 const isLoading = ref(false)
 const loadingOffset = ref(0)
+const numberOfCastToShow = 13
 //const default settings is true when loading offset isn't 0 and/or show images is false
 const queryParams = {
   params: {
@@ -374,7 +375,7 @@ const computeGridStyles = () => {
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
                 class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
-                <button class="close-button" @click="resetAllCardsAndCastVisiblity">CLOSE CARD</button>
+                <button class="close-button">CLOSE CARD</button>
                 <button v-if="!showingCast" class="ml-4 showCast" @click.stop="toggleCastVisibility(film.id)">
                   SHOW CAST
                 </button>
@@ -407,13 +408,17 @@ const computeGridStyles = () => {
                 <div v-else>
                   <h3 class="text-2xl mb-2">Cast List:</h3>
                   <ul>
-                    <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
-                      SHOW SYNOPSIS
-                    </button>
-                    <li v-for="castItem in film.castList" :key="castItem.actorName" class="text-xl">
-                      <span class="cursor-pointer hover:underline" @click="addActorFromCast(castItem.actorName)">{{
-                        castItem.actorName }}</span> as {{ castItem.characterName }}
-                    </li>
+                    <template v-if="film.castList">
+                      <li v-for="(castItem, index) in film.castList.slice(0, numberOfCastToShow)" :key="castItem.actorName"
+                        class="text-xl">
+                        <span class="cursor-pointer hover:underline" @click="addActorFromCast(castItem.actorName)">
+                          {{ castItem.actorName }}
+                        </span> as {{ castItem.characterName }}
+                      </li>
+                      <li v-if="film.castList.length > numberOfCastToShow">
+                        and {{ film.castList.length - numberOfCastToShow }} others
+                      </li>
+                    </template>
                   </ul>
 
                 </div>

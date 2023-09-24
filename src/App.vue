@@ -36,20 +36,9 @@ const flipCard = (event) => {
   // find parent card element
   const card = event.target.closest('.card');
   const cardInner = event.target.closest('.card__inner');
-
-  // Remove inner-is-flipped class from all other cards
-  const allCards = document.querySelectorAll('.card');
-  allCards.forEach((otherCard) => {
-    if (otherCard !== card) {
-      otherCard.classList.remove('inner-is-flipped');
-      otherCard.querySelector('.card__inner').classList.remove('flipped');
-    }
-  });
-
-  card.classList.toggle('inner-is-flipped');
+  card.classList.add('inner-is-flipped');
   //remove scrolling from body
-  document.body.classList.toggle('overflow-hidden');
-
+  document.body.classList.add('overflow-hidden');
   cardInner.classList.toggle('flipped');
 };
 
@@ -373,7 +362,7 @@ const computeGridStyles = () => {
               <img :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
                 class="md:group-hover:scale-95 w-full">
             </div>
-            <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
+            <div @click.stop="resetAllCardsAndCastVisiblity" class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
                 class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
@@ -408,7 +397,7 @@ const computeGridStyles = () => {
 
                 </div>
                 <div v-else>
-                  <h3 class="text-2xl mb-2">Cast List:</h3>
+                  <h3 class="text-2xl mb-2">CAST LIST:</h3>
                   <ul>
                     <template v-if="film.castList">
                       <li v-for="(castItem, index) in film.castList.slice(0, numberOfCastToShow)" :key="castItem.actorName"

@@ -194,8 +194,12 @@ const toggleCastVisibility = (filmId) => {
     axios
       .get(`https://api.themoviedb.org/3/movie/${filmId}/credits`, queryParams)
       .then((response) => {
-        const castList = response.data.cast.map((actor) => `${actor.name} as ${actor.character}`);
+        const castList = response.data.cast.map((actor) => ({
+          actorName: actor.name,
+          characterName: actor.character,
+        }));
         film.castList = castList;
+        console.log(castList)
         showingCast.value = true;
       })
       .catch((error) => {
@@ -204,6 +208,28 @@ const toggleCastVisibility = (filmId) => {
   } else {
     // If cast list exists, simply toggle visibility
     showingCast.value = !showingCast.value;
+  }
+};
+
+const resetAllCardsAndCastVisiblity = () => {
+  //remove card visibility and force card to show front
+  document.body.classList.remove('overflow-hidden');
+  const allCards = document.querySelectorAll('.card');
+  allCards.forEach((otherCard) => {
+    otherCard.classList.remove('inner-is-flipped');
+    otherCard.querySelector('.card__inner').classList.remove('flipped');
+  });
+  //hide cast
+  showingCast.value = false;
+
+}
+
+const addActorFromCast = (actorName) => {
+  const confirmation = confirm(`Do you want to add ${actorName} to the comparison array? (this will immediately run a new search)`);
+  if (confirmation) {
+    addActorName(actorName);
+    //run comparison immediately
+    compareActorsFilmographies(actorsForComparison.value)
   }
 };
 
@@ -329,7 +355,7 @@ const computeGridStyles = () => {
 
     <ul v-if="actorsCommonFilms.length" :class="computeGridStyles()" class="p-4">
       <li v-for="film in actorsCommonFilms" :key="film.id" class="aspect-[2/3]">
-        <div class="card w-full h-full" @click="flipCard($event)">
+        <div class="card w-full h-full" @click.once="flipCard($event)">
           <div class="card__inner w-full h-full md:transition-transform md:duration-300">
             <div class="front z-[2]">
               <img :src="generateImageLink(film.poster_path)" :alt="`Movie title: ${film.original_title}`"
@@ -338,7 +364,7 @@ const computeGridStyles = () => {
             <div class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4">
+                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
                 <div v-if="!showingCast">
                   <div>
                     <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
@@ -368,12 +394,18 @@ const computeGridStyles = () => {
                 <div v-else>
                   <h3 class="text-2xl mb-2">Cast List:</h3>
                   <ul>
-                    <li v-for="actor in film.castList" :key="actor" class="text-xl">{{ actor }}</li>
+                    <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
+                      SHOW SYNOPSIS
+                    </button>
+                    <li v-for="castItem in film.castList" :key="castItem.actorName" class="text-xl">
+                      <span class="cursor-pointer hover:underline" @click="addActorFromCast(castItem.actorName)">{{
+                        castItem.actorName }}</span> as {{ castItem.characterName }}
+                    </li>
                   </ul>
-                  <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
-                    SHOW SYNOPSIS
-                  </button>
+
                 </div>
+
+                <button class="close-button" @click="resetAllCardsAndCastVisiblity">CLOSE CARD</button>
               </div>
 
             </div>

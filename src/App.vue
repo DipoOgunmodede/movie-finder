@@ -371,6 +371,11 @@ const computeGridStyles = () => {
               <div
                 class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
                 <button class="close-button" @click="resetAllCardsAndCastVisiblity">CLOSE CARD</button>
+                <button v-if="!showingCast" class="ml-4 showCast" @click.stop="toggleCastVisibility(film.id)">
+                  SHOW CAST
+                </button>
+                <button v-else class="ml-4 showCast" @click.stop="toggleCastVisibility(film.id)">
+                  SHOW SYNOPSIS</button>
                 <div v-if="!showingCast">
                   <div>
                     <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
@@ -393,9 +398,7 @@ const computeGridStyles = () => {
                   </div>
                   <p class="mt-4 line-clamp-[16] md:hidden 2xl:inline 2xl:line-clamp-[8]">Synopsis: {{ film.overview }}
                   </p>
-                  <button class="showCast" @click.stop="toggleCastVisibility(film.id)">
-                    SHOW CAST
-                  </button>
+
                 </div>
                 <div v-else>
                   <h3 class="text-2xl mb-2">Cast List:</h3>
@@ -448,6 +451,8 @@ const computeGridStyles = () => {
         <li>Add save search functionality</li>
         <li>View cast button</li>
         <li>Add actor button to cast list</li>
+        <li>Cast list overflows poorly</li>
+        <li>Improve usablity (keyboard shortcuts)</li>
         <ul class="list-disc list-inside">
           <li>Overhaul design completely. It looks even worse on desktop</li>
           <li><span class="line-through">Responsive styles</span> (implemented 29/3/23)</li>

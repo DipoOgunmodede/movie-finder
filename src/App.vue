@@ -74,6 +74,10 @@ const openSettingsCheck = () => {
 //add a method to remove an actor from the array on element click, but keeping the rest
 const removeActor = (actorName) => {
   actorsForComparison.value = actorsForComparison.value.filter(actor => actor !== actorName)
+  //immediately run comparison if there are more than 1 actors in the array
+  if (actorsForComparison.value.length > 1) {
+    compareActorsFilmographies(actorsForComparison.value)
+  }
 }
 
 const getActorIdFromName = async (actorName) => {
@@ -228,11 +232,12 @@ const addActorFromCast = (actorName) => {
   const confirmation = confirm(`Do you want to add ${actorName} to the comparison array? (this will immediately run a new search)`);
   if (confirmation) {
     addActorName(actorName);
+    //reset all cards and cast visibility
+    resetAllCardsAndCastVisiblity();
     //run comparison immediately
     compareActorsFilmographies(actorsForComparison.value)
   }
 };
-
 
 //format large numbers to dollars without decimal places
 const formatUSD = (number) => {
@@ -365,6 +370,7 @@ const computeGridStyles = () => {
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
                 class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
+                <button class="close-button" @click="resetAllCardsAndCastVisiblity">CLOSE CARD</button>
                 <div v-if="!showingCast">
                   <div>
                     <h2 class="text-6xl md:text-3xl 2xl:text-8xl mb-2">{{ film.original_title }}</h2>
@@ -405,7 +411,7 @@ const computeGridStyles = () => {
 
                 </div>
 
-                <button class="close-button" @click="resetAllCardsAndCastVisiblity">CLOSE CARD</button>
+
               </div>
 
             </div>

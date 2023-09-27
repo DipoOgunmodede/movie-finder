@@ -302,7 +302,6 @@ const computeGridStyles = () => {
 
 <template>
   <div class="flex flex-col justify-center dark:text-white p-4">
-    <p>This is an extremely basic prototype for an app that tells you which films actors have been in together.</p>
     <div class="flex flex-col justify-center gap-4">
       <section class="flex gap-4 my-4 ">
         <input type="text" class="actor actor2 text-black border border-black dark:border-white p-2 w-2/3"
@@ -329,7 +328,7 @@ const computeGridStyles = () => {
     <transition name="fade" v-if="isLoading">
       <div
         class="loading-overlay overflow-hidden p-4 fixed inset-0 w-full h-full bg-white dark:bg-black bg-opacity-100 flex flex-col gap-6 justify-items-center z-10">
-        <p v-if="actorsForComparison.length > 0">Looking up filmographies for the following:</p>
+        <p v-if="actorsForComparison.length > 0">Looking for shared filmography of the following:</p>
         <p>{{ transformNamesToTitleCase(actorsForComparison.join(', ')) }}</p>
         <div class="flex flex-wrap justify-around gap-4">
           <img v-for="actor in actorPictures" :src="actor"
@@ -339,7 +338,7 @@ const computeGridStyles = () => {
     </transition>
     <button @click="compareActorsFilmographies(actorsForComparison)"
       class="p-4 my-4 border border-black dark:border-white bg-green-500 disabled:bg-red-700 disabled:cursor-not-allowed"
-      :disabled="actorsForComparison.length < 2">Compare filmographies</button>
+      :disabled="actorsForComparison.length < 2">Find shared filmography</button>
 
     <!-- show list if they have appeared in a film together -->
     <h2 class="text-4xl underline" v-if="actorsCommonFilms.length">
@@ -428,7 +427,7 @@ const computeGridStyles = () => {
 
 
     <h2 class="text-4xl underline"></h2>
-    <div class="border border-black dark:border-white p-4 my-4">
+    <div class="hidden border border-black dark:border-white p-4 my-4">
       <details>
         <summary>Current limitations (I won't be fixing these):</summary>
         <ul class="list-disc list-inside">

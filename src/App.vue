@@ -364,7 +364,7 @@ const computeGridStyles = () => {
             <div @click.stop="resetAllCardsAndCastVisiblity" class="back h-full w-full bg-cover bg-no-repeat bg-center overflow-hidden p-4"
               :style="{ 'background-image': `url(${generateImageLink(film.poster_path)})` }">
               <div
-                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-hidden">
+                class="p-6 w-full h-full bg-[#305252] bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-50 border film-information space-y-4 overflow-y-auto">
                 <button class="close-button">CLOSE CARD</button>
                 <button v-if="!showingCast" class="ml-4 showCast" @click.stop="toggleCastVisibility(film.id)">
                   SHOW CAST
@@ -381,7 +381,7 @@ const computeGridStyles = () => {
                     <p v-if="film.budget > 0">Film budget: {{ formatUSD(film.budget) }}</p>
                     <p v-if="film.revenue > 0">Film revenue: {{ formatUSD(film.revenue) }}</p>
                     <!-- loop over all genres in film.genres -->
-                    <p class="line-clamp-1">
+                    <p>
                       {{ film.genres.length > 1 ? 'Genres:' : 'Genre:' }}
                       <span v-for="(genre, index) in film.genres" :key="genre.id">
                         {{ genre.name }}<span v-if="index < film.genres.length - 1">,
@@ -391,7 +391,7 @@ const computeGridStyles = () => {
 
                     <p>Runtime: {{ film.runtime + ' minutes' }}</p>
                   </div>
-                  <p class="mt-4 line-clamp-[16] md:hidden 2xl:inline 2xl:line-clamp-[8]">Synopsis: {{ film.overview }}
+                  <p class="mt-4 md:hidden 2xl:inline ">Synopsis: {{ film.overview }}
                   </p>
 
                 </div>

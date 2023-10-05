@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
+import {getCast, queryParams} from './utils/utils.js'
 const currentActor = ref('')
 const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
@@ -12,11 +13,6 @@ const isLoading = ref(false)
 const loadingOffset = ref(0)
 const numberOfCastToShow = 13
 //const default settings is true when loading offset isn't 0 and/or show images is false
-const queryParams = {
-  params: {
-    api_key: "c92bac37a196e6559bcb667ecb49b1e1",
-  },
-}
 
 const addActorName = (actorName) => {
   actorsForComparison.value = [...actorsForComparison.value, actorName];
@@ -67,6 +63,9 @@ const removeActor = (actorName) => {
   //immediately run comparison if there are more than 1 actors in the array
   if (actorsForComparison.value.length > 1) {
     compareActorsFilmographies(actorsForComparison.value)
+  }
+  if (actorsForComparison.value.length === 1) {
+    actorsCommonFilms.value = []
   }
 }
 
@@ -182,22 +181,7 @@ const compareActorsFilmographies = async (actorsForComparison) => {
   }
 };
 
-const getCast = (film) => {
-  axios
-    .get(`https://api.themoviedb.org/3/movie/${film.id}/credits`, queryParams)
-    .then((response) => {
-      const castList = response.data.cast.map((actor) => ({
-        actorName: actor.name,
-        characterName: actor.character,
-      }));
-      film.castList = castList;
-      console.log(castList);
-      showingCast.value = true;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
+
 
 const toggleCastVisibility = (filmId) => {
   const film = actorsCommonFilms.value.find((film) => film.id === filmId);

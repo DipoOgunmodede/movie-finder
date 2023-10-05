@@ -64,6 +64,9 @@ const removeActor = (actorName) => {
   if (actorsForComparison.value.length > 1) {
     compareActorsFilmographies(actorsForComparison.value)
   }
+  if (actorsForComparison.value.length === 1) {
+    actorsCommonFilms.value = []
+  }
 }
 
 const getActorIdFromName = async (actorName) => {

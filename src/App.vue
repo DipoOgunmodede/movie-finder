@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
-import {getCast, queryParams} from './utils/utils.js'
+import {getCast, queryParams, getImdbCastLink} from './utils/utils.js'
 const currentActor = ref('')
 const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
@@ -184,12 +184,15 @@ const compareActorsFilmographies = async (actorsForComparison) => {
 
 
 const toggleCastVisibility = (filmId) => {
+  console.log("button clicked")
   const film = actorsCommonFilms.value.find((film) => film.id === filmId);
 
   if (!film.castList) {
-    getCast(film);
+    getCast(film, showingCast, numberOfCastToShow);
+
   } else {
     // If cast list exists, simply toggle visibility
+    console.log("cast list exists")
     showingCast.value = !showingCast.value;
   }
 };
@@ -390,7 +393,7 @@ const computeGridStyles = () => {
                         </span> as {{ castItem.characterName }}
                       </li>
                       <li v-if="film.castList.length > numberOfCastToShow">
-                        and {{ film.castList.length - numberOfCastToShow }} others
+                       <a :href="getImdbCastLink(film)"> and {{ film.castList.length - numberOfCastToShow }} others</a>
                       </li>
                     </template>
                   </ul>

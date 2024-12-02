@@ -4,7 +4,7 @@ import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
 import {getCast, queryParams, getImdbCastLink} from './utils/utils.js'
 const currentActor = ref('')
-const actorsForComparison = ref(['Ben Affleck', 'Matt Damon', 'George Clooney'])
+const actorsForComparison = ref(['Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
 const actorPictures = ref([])
 const showingCast = ref(false)

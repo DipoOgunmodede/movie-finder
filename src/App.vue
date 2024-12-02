@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { watch } from 'vue'
 import { ref, onMounted } from 'vue'
-import {getCast, queryParams, getImdbCastLink} from './utils/utils.js'
+import {getCast, queryParams} from './utils/utils.js'
 const currentActor = ref('')
 const actorsForComparison = ref(['Matt Damon', 'George Clooney'])
 const actorsCommonFilms = ref({})
